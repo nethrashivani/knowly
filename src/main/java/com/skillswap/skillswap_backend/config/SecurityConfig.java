@@ -36,7 +36,9 @@ public class SecurityConfig {
                 // Public endpoints
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                // Anyone can view skills
+                // A user's own skills require authentication
+                .requestMatchers(HttpMethod.GET, "/api/skills/my").authenticated()
+                // Anyone can view the public skill catalogue
                 .requestMatchers(HttpMethod.GET, "/api/skills/**").permitAll()
                 // Only authenticated users can create/edit/delete
                 .requestMatchers(HttpMethod.POST, "/api/skills/**").authenticated()
