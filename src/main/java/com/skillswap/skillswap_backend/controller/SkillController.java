@@ -28,33 +28,10 @@ public class SkillController {
         return ResponseEntity.ok(skillService.getAllSkills());
     }
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Get skill by ID")
-    public ResponseEntity<SkillDTO> getSkillById(@PathVariable Long id) {
-        return ResponseEntity.ok(skillService.getSkillById(id));
-    }
-
-    @PostMapping
-    @Operation(summary = "Create a new skill")
-    public ResponseEntity<SkillDTO> createSkill(@Valid @RequestBody SkillDTO skillDTO,
-            Principal principal) {
-        return new ResponseEntity<>(skillService.createSkill(skillDTO, principal.getName()), HttpStatus.CREATED);
-    }
-
-    @PutMapping("/{id}")
-    @Operation(summary = "Update an existing skill")
-    public ResponseEntity<SkillDTO> updateSkill(@PathVariable Long id,
-            @Valid @RequestBody SkillDTO skillDTO,
-            Principal principal) {
-        return ResponseEntity.ok(skillService.updateSkill(id, skillDTO, principal.getName()));
-    }
-
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Delete a skill")
-    public ResponseEntity<String> deleteSkill(@PathVariable Long id,
-            Principal principal) {
-        skillService.deleteSkill(id, principal.getName());
-        return ResponseEntity.ok("Skill deleted successfully");
+    @GetMapping("/my")
+    @Operation(summary = "Get my skills")
+    public ResponseEntity<List<SkillDTO>> getMySkills(Principal principal) {
+        return ResponseEntity.ok(skillService.getMySkills(principal.getName()));
     }
 
     @GetMapping("/search")
@@ -69,9 +46,32 @@ public class SkillController {
         return ResponseEntity.ok(skillService.getSkillsByCategory(category));
     }
 
-    @GetMapping("/my")
-    @Operation(summary = "Get my skills")
-    public ResponseEntity<List<SkillDTO>> getMySkills(Principal principal) {
-        return ResponseEntity.ok(skillService.getMySkills(principal.getName()));
+    @GetMapping("/{id:\\d+}")
+    @Operation(summary = "Get skill by ID")
+    public ResponseEntity<SkillDTO> getSkillById(@PathVariable Long id) {
+        return ResponseEntity.ok(skillService.getSkillById(id));
+    }
+
+    @PostMapping
+    @Operation(summary = "Create a new skill")
+    public ResponseEntity<SkillDTO> createSkill(@Valid @RequestBody SkillDTO skillDTO,
+            Principal principal) {
+        return new ResponseEntity<>(skillService.createSkill(skillDTO, principal.getName()), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id:\\d+}")
+    @Operation(summary = "Update an existing skill")
+    public ResponseEntity<SkillDTO> updateSkill(@PathVariable Long id,
+            @Valid @RequestBody SkillDTO skillDTO,
+            Principal principal) {
+        return ResponseEntity.ok(skillService.updateSkill(id, skillDTO, principal.getName()));
+    }
+
+    @DeleteMapping("/{id:\\d+}")
+    @Operation(summary = "Delete a skill")
+    public ResponseEntity<String> deleteSkill(@PathVariable Long id,
+            Principal principal) {
+        skillService.deleteSkill(id, principal.getName());
+        return ResponseEntity.ok("Skill deleted successfully");
     }
 }
