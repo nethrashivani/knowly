@@ -1,8 +1,12 @@
 package com.skillswap.skillswap_backend.service;
 
+import com.skillswap.skillswap_backend.exception.ResourceNotFoundException;
+import com.skillswap.skillswap_backend.exception.UnauthorizedException;
 import com.skillswap.skillswap_backend.dto.SkillDTO;
 import com.skillswap.skillswap_backend.entity.Skill;
+import com.skillswap.skillswap_backend.entity.User;
 import com.skillswap.skillswap_backend.repository.SkillRepository;
+import com.skillswap.skillswap_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +18,7 @@ import java.util.stream.Collectors;
 public class SkillService {
 
     private final SkillRepository skillRepository;
+    private final UserRepository userRepository;
 
     // Get all skills
     public List<SkillDTO> getAllSkills() {
@@ -26,31 +31,37 @@ public class SkillService {
     // Get skill by ID
     public SkillDTO getSkillById(Long id) {
         Skill skill = skillRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Skill not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Skill not found with id: " + id));
         return convertToDTO(skill);
     }
 
     // Create skill
     public SkillDTO createSkill(SkillDTO skillDTO, String ownerEmail) {
+
+        User owner = userRepository.findByEmail(ownerEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
         Skill skill = convertToEntity(skillDTO);
-        skill.setOwnerEmail(ownerEmail);
+        skill.setOwner(owner);
+
         Skill savedSkill = skillRepository.save(skill);
         return convertToDTO(savedSkill);
     }
 
     // Update skill
     public SkillDTO updateSkill(Long id, SkillDTO skillDTO, String ownerEmail) {
+
         Skill existing = skillRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Skill not found with id: " + id));
 
-        if (existing.getOwnerEmail() != null && !existing.getOwnerEmail().equals(ownerEmail)) {
-            throw new RuntimeException("You are not authorized to edit this skill");
+        if (existing.getOwner() == null
+                || !existing.getOwner().getEmail().equals(ownerEmail)) {
+            throw new UnauthorizedException("You are not authorized to edit this skill");
         }
 
         existing.setTitle(skillDTO.getTitle());
         existing.setCategory(skillDTO.getCategory());
         existing.setDescription(skillDTO.getDescription());
-        existing.setInstructorName(skillDTO.getInstructorName());
         existing.setExperienceYears(skillDTO.getExperienceYears());
         existing.setLocation(skillDTO.getLocation());
 
@@ -60,11 +71,13 @@ public class SkillService {
 
     // Delete skill
     public void deleteSkill(Long id, String ownerEmail) {
-        Skill skill = skillRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Skill not found with id: " + id));
 
-        if (skill.getOwnerEmail() != null && !skill.getOwnerEmail().equals(ownerEmail)) {
-            throw new RuntimeException("You are not authorized to delete this skill");
+        Skill skill = skillRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Skill not found with id: " + id));
+
+        if (skill.getOwner() == null
+                || !skill.getOwner().getEmail().equals(ownerEmail)) {
+            throw new UnauthorizedException("You are not authorized to delete this skill");
         }
 
         skillRepository.delete(skill);
@@ -86,7 +99,7 @@ public class SkillService {
                 .collect(Collectors.toList());
     }
 
-    // --- Mapper methods ---
+    // Mapper methods
 
     private SkillDTO convertToDTO(Skill skill) {
         return SkillDTO.builder()
@@ -94,11 +107,15 @@ public class SkillService {
                 .title(skill.getTitle())
                 .category(skill.getCategory())
                 .description(skill.getDescription())
-                .instructorName(skill.getInstructorName())
+                .instructorName(skill.getOwner() != null
+                        ? skill.getOwner().getName()
+                        : null)
                 .experienceYears(skill.getExperienceYears())
                 .location(skill.getLocation())
                 .createdAt(skill.getCreatedAt())
-                .ownerEmail(skill.getOwnerEmail())
+                .ownerEmail(skill.getOwner() != null
+                        ? skill.getOwner().getEmail()
+                        : null)
                 .build();
     }
 
@@ -107,14 +124,13 @@ public class SkillService {
                 .title(dto.getTitle())
                 .category(dto.getCategory())
                 .description(dto.getDescription())
-                .instructorName(dto.getInstructorName())
                 .experienceYears(dto.getExperienceYears())
                 .location(dto.getLocation())
                 .build();
     }
 
     public List<SkillDTO> getMySkills(String ownerEmail) {
-        return skillRepository.findByOwnerEmail(ownerEmail)
+        return skillRepository.findByOwner_Email(ownerEmail)
                 .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());

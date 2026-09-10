@@ -25,14 +25,13 @@ public class Skill {
     @Column(nullable = false)
     private String category;
 
-    @NotBlank(message = "Description is required")
+        @NotBlank(message = "Description is required")
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @NotBlank(message = "Instructor name is required")
-    private String instructorName;
-
     @Min(value = 0, message = "Experience years cannot be negative")
+
+    
     @Max(value = 50, message = "Experience years seems too high")
     private Integer experienceYears;
 
@@ -42,7 +41,9 @@ public class Skill {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    private String ownerEmail;  // ← new
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
 
     @PrePersist
     protected void onCreate() {

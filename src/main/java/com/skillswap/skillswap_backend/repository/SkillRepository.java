@@ -14,7 +14,7 @@ public interface SkillRepository extends JpaRepository<Skill, Long> {
     // Filter by category
     List<Skill> findByCategory(String category);
 
-    List<Skill> findByOwnerEmail(String ownerEmail);
+    List<Skill> findByOwner_Email(String email);
 
     // Search by title or category containing keyword
     @Query("SELECT s FROM Skill s WHERE " +
