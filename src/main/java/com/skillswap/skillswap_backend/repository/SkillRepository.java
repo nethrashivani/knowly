@@ -14,6 +14,11 @@ public interface SkillRepository extends JpaRepository<Skill, Long> {
     // Filter by category
     List<Skill> findByCategory(String category);
 
+    // Filter skills with custom categories
+    @Query("SELECT s FROM Skill s WHERE s.category NOT IN " +
+            "('Technology', 'Music', 'Art', 'Language', 'Sports', 'Cooking')")
+    List<Skill> findOtherSkills();
+
     List<Skill> findByOwner_Email(String email);
 
     // Search by title or category containing keyword

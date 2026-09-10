@@ -1,6 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllSkills, searchSkills, getSkillsByCategory, deleteSkill } from '../services/skillService';
+import {
+  getAllSkills,
+  searchSkills,
+  getSkillsByCategory,
+  getOtherSkills,
+  deleteSkill
+} from '../services/skillService';
 import { isLoggedIn, getUser, logout } from '../services/authService';
 
 const CATEGORIES = ['All', 'Technology', 'Music', 'Art', 'Language', 'Sports', 'Cooking', 'Other'];
@@ -48,6 +54,9 @@ export default function HomePage() {
       setLoading(true);
       if (category === 'All') {
         const data = await getAllSkills();
+        setSkills(data);
+      } else if (category === 'Other') {
+        const data = await getOtherSkills();
         setSkills(data);
       } else {
         const data = await getSkillsByCategory(category);

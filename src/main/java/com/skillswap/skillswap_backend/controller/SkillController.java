@@ -46,6 +46,12 @@ public class SkillController {
         return ResponseEntity.ok(skillService.getSkillsByCategory(category));
     }
 
+    @GetMapping("/other")
+@Operation(summary = "Get skills with custom categories")
+public ResponseEntity<List<SkillDTO>> getOtherSkills() {
+    return ResponseEntity.ok(skillService.getOtherSkills());
+}
+
     @GetMapping("/{id:\\d+}")
     @Operation(summary = "Get skill by ID")
     public ResponseEntity<SkillDTO> getSkillById(@PathVariable Long id) {

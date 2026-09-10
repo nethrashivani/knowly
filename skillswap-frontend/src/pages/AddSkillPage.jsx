@@ -13,6 +13,7 @@ export default function AddSkillPage() {
   const [form, setForm] = useState({
     title: '',
     category: '',
+    customCategory: '',
     description: '',
     instructorName: '',
     experienceYears: '',
@@ -26,6 +27,9 @@ export default function AddSkillPage() {
   const validate = () => {
     if (!form.title.trim()) return 'Title is required';
     if (!form.category) return 'Category is required';
+    if (form.category === 'Other' && !form.customCategory.trim()) {
+      return 'Please specify your category';
+    }
     if (!form.description.trim()) return 'Description is required';
     if (!form.instructorName.trim()) return 'Instructor name is required';
     if (form.experienceYears === '' || form.experienceYears < 0) return 'Valid experience years required';
@@ -40,7 +44,17 @@ export default function AddSkillPage() {
     try {
       setLoading(true);
       setError('');
-      await createSkill({ ...form, experienceYears: parseInt(form.experienceYears) });
+      const skillData = {
+        ...form,
+        category: form.category === 'Other'
+          ? form.customCategory.trim()
+          : form.category,
+        experienceYears: parseInt(form.experienceYears),
+      };
+
+      delete skillData.customCategory;
+
+      await createSkill(skillData);
       setSuccess('Skill created successfully!');
       setTimeout(() => navigate('/'), 1500);
     } catch (err) {
@@ -84,6 +98,7 @@ export default function AddSkillPage() {
 
           <div>
             <label className="text-sm font-medium text-gray-700">Category</label>
+
             <select
               name="category"
               value={form.category}
@@ -91,11 +106,28 @@ export default function AddSkillPage() {
               className="w-full mt-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               <option value="">Select a category</option>
+
               {CATEGORIES.map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
           </div>
+
+          {form.category === 'Other' && (
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Specify Category
+              </label>
+
+              <input
+                name="customCategory"
+                value={form.customCategory}
+                onChange={handleChange}
+                placeholder="e.g. Photography, Finance, Dance..."
+                className="w-full mt-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+          )}
 
           <div>
             <label className="text-sm font-medium text-gray-700">Description</label>

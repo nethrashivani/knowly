@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getToken } from './authService';
 
-const BASE_URL = 'http://localhost:8080/api/skills';
+const BASE_URL = 'http://localhost:8081/api/skills';
 
 const authHeaders = () => ({
     headers: { Authorization: `Bearer ${getToken()}` }
@@ -43,5 +43,10 @@ export const getSkillsByCategory = async (category) => {
 
 export const getMySkills = async () => {
     const response = await axios.get(`${BASE_URL}/my`, authHeaders());
+    return response.data;
+};
+
+export const getOtherSkills = async () => {
+    const response = await axios.get(`${BASE_URL}/other`);
     return response.data;
 };

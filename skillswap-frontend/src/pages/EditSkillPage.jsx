@@ -15,6 +15,7 @@ export default function EditSkillPage() {
   const [form, setForm] = useState({
     title: '',
     category: '',
+    customCategory: '',
     description: '',
     instructorName: '',
     experienceYears: '',
@@ -25,9 +26,12 @@ export default function EditSkillPage() {
     const fetchSkill = async () => {
       try {
         const data = await getSkillById(id);
+        const isCustomCategory = !CATEGORIES.includes(data.category);
+
         setForm({
           title: data.title,
-          category: data.category,
+          category: isCustomCategory ? 'Other' : data.category,
+          customCategory: isCustomCategory ? data.category : '',
           description: data.description,
           instructorName: data.instructorName,
           experienceYears: data.experienceYears,
@@ -49,6 +53,10 @@ export default function EditSkillPage() {
   const validate = () => {
     if (!form.title.trim()) return 'Title is required';
     if (!form.category) return 'Category is required';
+
+    if (form.category === 'Other' && !form.customCategory.trim()) {
+      return 'Please specify your category';
+    }
     if (!form.description.trim()) return 'Description is required';
     if (!form.instructorName.trim()) return 'Instructor name is required';
     if (form.experienceYears === '' || form.experienceYears < 0) return 'Valid experience years required';
@@ -63,7 +71,17 @@ export default function EditSkillPage() {
     try {
       setLoading(true);
       setError('');
-      await updateSkill(id, { ...form, experienceYears: parseInt(form.experienceYears) });
+      const skillData = {
+        ...form,
+        category: form.category === 'Other'
+          ? form.customCategory.trim()
+          : form.category,
+        experienceYears: parseInt(form.experienceYears),
+      };
+
+      delete skillData.customCategory;
+
+      await updateSkill(id, skillData);
       setSuccess('Skill updated successfully!');
       setTimeout(() => navigate('/'), 1500);
     } catch (err) {
@@ -124,6 +142,21 @@ export default function EditSkillPage() {
               ))}
             </select>
           </div>
+          {form.category === 'Other' && (
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Specify Category
+              </label>
+
+              <input
+                name="customCategory"
+                value={form.customCategory}
+                onChange={handleChange}
+                placeholder="e.g. Photography, Finance, Dance..."
+                className="w-full mt-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+          )}
 
           <div>
             <label className="text-sm font-medium text-gray-700">Description</label>

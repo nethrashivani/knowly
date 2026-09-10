@@ -99,6 +99,13 @@ public class SkillService {
                 .collect(Collectors.toList());
     }
 
+    // Filter by custom categories
+    public List<SkillDTO> getOtherSkills() {
+        return skillRepository.findOtherSkills()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
     // Mapper methods
 
     private SkillDTO convertToDTO(Skill skill) {
