@@ -1,0 +1,43 @@
+import axios from 'axios';
+import { getToken } from './authService';
+
+const BASE_URL = 'http://localhost:8080/api/workshops';
+
+const authHeaders = () => ({
+  headers: {
+    Authorization: `Bearer ${getToken()}`
+  }
+});
+
+export const getAllWorkshops = async () => {
+  const response = await axios.get(BASE_URL);
+  return response.data;
+};
+
+export const getMyWorkshops = async () => {
+  const response = await axios.get(`${BASE_URL}/my`, authHeaders());
+  return response.data;
+};
+
+export const createWorkshop = async (workshopData) => {
+  const response = await axios.post(
+    BASE_URL,
+    workshopData,
+    authHeaders()
+  );
+  return response.data;
+};
+
+export const deleteWorkshop = async (id) => {
+  await axios.delete(`${BASE_URL}/${id}`, authHeaders());
+};
+
+export const applyForWorkshop = async (workshopId) => {
+  const response = await axios.post(
+    `http://localhost:8080/api/workshop-applications/workshop/${workshopId}`,
+    {},
+    authHeaders()
+  );
+
+  return response.data;
+};

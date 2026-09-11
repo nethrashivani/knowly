@@ -52,8 +52,7 @@ public class GlobalExceptionHandler {
         for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
             fieldErrors.put(
                     fieldError.getField(),
-                    fieldError.getDefaultMessage()
-            );
+                    fieldError.getDefaultMessage());
         }
 
         Map<String, Object> error = new HashMap<>();
@@ -68,7 +67,7 @@ public class GlobalExceptionHandler {
     // Handle any other unexpected errors
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneralException(Exception ex) {
-
+        // ex.printStackTrace();
         Map<String, Object> error = new HashMap<>();
         error.put("timestamp", LocalDateTime.now());
         error.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());

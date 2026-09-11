@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getToken } from './authService';
 
-const BASE_URL = 'http://localhost:8081/api/skills';
+const BASE_URL = 'http://localhost:8080/api/skills';
 
 const authHeaders = () => ({
     headers: { Authorization: `Bearer ${getToken()}` }

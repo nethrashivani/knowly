@@ -100,6 +100,16 @@ export default function HomePage() {
               >
                 My Skills
               </button>
+              <button
+                onClick={() => navigate('/profile')}
+                className="text-sm bg-blue-500 border border-white text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
+              >
+                Profile
+              </button>
+
+              <button onClick={() => navigate('/workshops')}>
+                Workshops
+              </button>
             </>
           ) : (
             <>

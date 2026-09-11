@@ -1,0 +1,60 @@
+package com.skillswap.skillswap_backend.controller;
+
+import com.skillswap.skillswap_backend.dto.WorkshopDTO;
+import com.skillswap.skillswap_backend.service.WorkshopService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/workshops")
+public class WorkshopController {
+
+    private final WorkshopService workshopService;
+
+    public WorkshopController(WorkshopService workshopService) {
+        this.workshopService = workshopService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<WorkshopDTO>> getAllWorkshops() {
+        return ResponseEntity.ok(workshopService.getAllWorkshops());
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<WorkshopDTO>> getMyWorkshops(
+            Authentication authentication) {
+
+        return ResponseEntity.ok(
+                workshopService.getMyWorkshops(authentication.getName())
+        );
+    }
+
+    @PostMapping
+    public ResponseEntity<WorkshopDTO> createWorkshop(
+            Authentication authentication,
+            @Valid @RequestBody WorkshopDTO dto) {
+
+        return ResponseEntity.ok(
+                workshopService.createWorkshop(
+                        authentication.getName(), dto
+                )
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteWorkshop(
+            Authentication authentication,
+            @PathVariable Long id) {
+
+        workshopService.deleteWorkshop(
+                id,
+                authentication.getName()
+        );
+
+        return ResponseEntity.noContent().build();
+    }
+}

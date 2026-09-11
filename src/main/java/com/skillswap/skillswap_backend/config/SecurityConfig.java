@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -33,25 +34,31 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable)
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // Public endpoints
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                // A user's own skills require authentication
-                .requestMatchers(HttpMethod.GET, "/api/skills/my").authenticated()
-                // Anyone can view the public skill catalogue
-                .requestMatchers(HttpMethod.GET, "/api/skills/**").permitAll()
-                // Only authenticated users can create/edit/delete
-                .requestMatchers(HttpMethod.POST, "/api/skills/**").authenticated()
-                .requestMatchers(HttpMethod.PUT, "/api/skills/**").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/api/skills/**").authenticated()
-                .anyRequest().authenticated()
-            )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/ratings/user/**").permitAll()
+                        .requestMatchers("/api/ratings/**").authenticated()
+
+                        .requestMatchers(HttpMethod.GET, "/api/profile/user/**").permitAll()
+                        .requestMatchers("/api/profile/**").authenticated()
+
+                        // WORKSHOPS
+                        .requestMatchers(HttpMethod.GET, "/api/workshops/**").permitAll()
+                        .requestMatchers("/api/workshops/**").authenticated()
+
+                        .requestMatchers("/api/workshop-applications/**").authenticated()
+
+                        .requestMatchers(HttpMethod.GET, "/api/skills/my").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/skills/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/skills/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/skills/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/skills/**").authenticated())
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -81,8 +88,10 @@ public class SecurityConfig {
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
-        return new UrlBasedCorsConfigurationSource() {{
-            registerCorsConfiguration("/**", config);
-        }};
+        return new UrlBasedCorsConfigurationSource() {
+            {
+                registerCorsConfiguration("/**", config);
+            }
+        };
     }
 }
