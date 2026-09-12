@@ -8,8 +8,18 @@ import {
   deleteSkill
 } from '../services/skillService';
 import { isLoggedIn, getUser, logout } from '../services/authService';
+import NotificationBell from '../components/NotificationBell';
 
-const CATEGORIES = ['All', 'Technology', 'Music', 'Art', 'Language', 'Sports', 'Cooking', 'Other'];
+const CATEGORIES = [
+  'All',
+  'Technology',
+  'Music',
+  'Art',
+  'Language',
+  'Sports',
+  'Cooking',
+  'Other'
+];
 
 export default function HomePage() {
   const [skills, setSkills] = useState([]);
@@ -17,11 +27,15 @@ export default function HomePage() {
   const [error, setError] = useState('');
   const [keyword, setKeyword] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+
   const navigate = useNavigate();
+  const user = getUser();
 
   const fetchSkills = useCallback(async () => {
     try {
       setLoading(true);
+      setError('');
+
       const data = await getAllSkills();
       setSkills(data);
     } catch (_err) {
@@ -36,9 +50,14 @@ export default function HomePage() {
   }, [fetchSkills]);
 
   const handleSearch = async () => {
-    if (!keyword.trim()) return fetchSkills();
+    if (!keyword.trim()) {
+      return fetchSkills();
+    }
+
     try {
       setLoading(true);
+      setError('');
+
       const data = await searchSkills(keyword);
       setSkills(data);
     } catch (_err) {
@@ -50,8 +69,11 @@ export default function HomePage() {
 
   const handleCategoryFilter = async (category) => {
     setSelectedCategory(category);
+
     try {
       setLoading(true);
+      setError('');
+
       if (category === 'All') {
         const data = await getAllSkills();
         setSkills(data);
@@ -70,10 +92,16 @@ export default function HomePage() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this skill?')) return;
+    if (!window.confirm('Are you sure you want to delete this skill?')) {
+      return;
+    }
+
     try {
       await deleteSkill(id);
-      setSkills(skills.filter(s => s.id !== id));
+
+      setSkills((prev) =>
+        prev.filter((skill) => skill.id !== id)
+      );
     } catch (_err) {
       setError('Delete failed.');
     }
@@ -84,22 +112,29 @@ export default function HomePage() {
 
       {/* Header */}
       <div className="bg-blue-600 text-white py-8 px-4 text-center relative">
-        <div className="absolute top-4 right-4 flex items-center gap-3">
+
+        {/* Navigation */}
+        <div className="absolute top-4 right-4 flex items-center gap-2">
+
           {isLoggedIn() ? (
             <>
-              <span className="text-sm text-blue-100">👤 {getUser()?.name}</span>
-              <button
-                onClick={() => { logout(); navigate('/login'); }}
-                className="text-sm bg-white text-blue-600 px-3 py-1 rounded-full hover:bg-blue-50 transition"
-              >
-                Logout
-              </button>
+              {/* User */}
+              <span className="text-sm text-blue-100 mr-1">
+                👤 {user?.name}
+              </span>
+
+              {/* Notifications */}
+              <NotificationBell />
+
+              {/* My Skills */}
               <button
                 onClick={() => navigate('/my-skills')}
                 className="text-sm bg-blue-500 border border-white text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
               >
                 My Skills
               </button>
+
+              {/* Profile */}
               <button
                 onClick={() => navigate('/profile')}
                 className="text-sm bg-blue-500 border border-white text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
@@ -107,18 +142,52 @@ export default function HomePage() {
                 Profile
               </button>
 
-              <button onClick={() => navigate('/workshops')}>
+              {/* Workshops */}
+              <button
+                onClick={() => navigate('/workshops')}
+                className="text-sm bg-blue-500 border border-white text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
+              >
                 Workshops
+              </button>
+
+              {/* My Workshops */}
+              <button
+                onClick={() => navigate('/my-workshops')}
+                className="text-sm bg-blue-500 border border-white text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
+              >
+                My Workshops
+              </button>
+
+              {/* My Applications */}
+              <button
+                onClick={() => navigate('/my-applications')}
+                className="text-sm bg-blue-500 border border-white text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
+              >
+                My Applications
+              </button>
+
+              {/* Logout */}
+              <button
+                onClick={() => {
+                  logout();
+                  navigate('/login');
+                }}
+                className="text-sm bg-white text-blue-600 px-3 py-1 rounded-full hover:bg-blue-50 transition"
+              >
+                Logout
               </button>
             </>
           ) : (
             <>
+              {/* Login */}
               <button
                 onClick={() => navigate('/login')}
                 className="text-sm bg-white text-blue-600 px-3 py-1 rounded-full hover:bg-blue-50 transition"
               >
                 Login
               </button>
+
+              {/* Register */}
               <button
                 onClick={() => navigate('/register')}
                 className="text-sm border border-white text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
@@ -127,111 +196,186 @@ export default function HomePage() {
               </button>
             </>
           )}
+
         </div>
-        <h1 className="text-4xl font-bold mb-2">SkillSwap</h1>
-        <p className="text-blue-100">Discover and share skills with others</p>
-        <button
-          onClick={() => navigate('/add')}
-          className="mt-4 bg-white text-blue-600 font-semibold px-6 py-2 rounded-full hover:bg-blue-50 transition"
-        >
-          + Add Your Skill
-        </button>
+
+        {/* Logo / Title */}
+        <h1 className="text-4xl font-bold mb-2">
+          SkillSwap
+        </h1>
+
+        <p className="text-blue-100">
+          Discover and share skills with others
+        </p>
+
+        {/* Add Skill */}
+        {isLoggedIn() && (
+          <button
+            onClick={() => navigate('/add')}
+            className="mt-4 bg-white text-blue-600 font-semibold px-6 py-2 rounded-full hover:bg-blue-50 transition"
+          >
+            + Add Your Skill
+          </button>
+        )}
+
       </div>
 
+      {/* Main Content */}
       <div className="max-w-6xl mx-auto px-4 py-6">
 
         {/* Search Bar */}
         <div className="flex gap-2 mb-6">
+
           <input
             type="text"
             placeholder="Search skills..."
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            onKeyDown={(e) =>
+              e.key === 'Enter' && handleSearch()
+            }
             className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
+
           <button
             onClick={handleSearch}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
           >
             Search
           </button>
+
           <button
-            onClick={() => { setKeyword(''); fetchSkills(); }}
+            onClick={() => {
+              setKeyword('');
+              fetchSkills();
+            }}
             className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
           >
             Clear
           </button>
+
         </div>
 
         {/* Category Filter */}
         <div className="flex flex-wrap gap-2 mb-6">
-          {CATEGORIES.map(cat => (
+
+          {CATEGORIES.map((cat) => (
             <button
               key={cat}
               onClick={() => handleCategoryFilter(cat)}
-              className={`px-4 py-1 rounded-full text-sm font-medium transition ${selectedCategory === cat
-                ? 'bg-blue-600 text-white'
-                : 'bg-white border border-gray-300 text-gray-600 hover:bg-blue-50'
-                }`}
+              className={`px-4 py-1 rounded-full text-sm font-medium transition ${
+                selectedCategory === cat
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white border border-gray-300 text-gray-600 hover:bg-blue-50'
+              }`}
             >
               {cat}
             </button>
           ))}
+
         </div>
 
         {/* Error */}
         {error && (
-          <div className="bg-red-100 text-red-700 px-4 py-2 rounded mb-4">{error}</div>
+          <div className="bg-red-100 text-red-700 px-4 py-2 rounded mb-4">
+            {error}
+          </div>
         )}
 
-        {/* Skills Grid */}
+        {/* Skills */}
         {loading ? (
-          <div className="text-center py-20 text-gray-400 text-lg">Loading skills...</div>
+          <div className="text-center py-20 text-gray-400 text-lg">
+            Loading skills...
+          </div>
         ) : skills.length === 0 ? (
-          <div className="text-center py-20 text-gray-400 text-lg">No skills found.</div>
+          <div className="text-center py-20 text-gray-400 text-lg">
+            No skills found.
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {skills.map(skill => (
-              <div key={skill.id} className="bg-white rounded-xl shadow hover:shadow-md transition p-5 flex flex-col justify-between">
+
+            {skills.map((skill) => (
+              <div
+                key={skill.id}
+                className="bg-white rounded-xl shadow hover:shadow-md transition p-5 flex flex-col justify-between"
+              >
+
+                {/* Skill Header */}
                 <div className="flex justify-between items-start mb-2">
+
                   <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-medium">
                     {skill.category}
                   </span>
-                  <span className="text-xs text-gray-400">{skill.experienceYears} yrs exp</span>
+
+                  <span className="text-xs text-gray-400">
+                    {skill.experienceYears} yrs exp
+                  </span>
+
                 </div>
-                <h2 className="text-lg font-bold text-gray-800 mb-1">{skill.title}</h2>
-                <p className="text-gray-500 text-sm mb-2 line-clamp-2">{skill.description}</p>
-                <p className="text-sm text-gray-600">👤 {skill.instructorName}</p>
-                <p className="text-sm text-gray-600">📍 {skill.location}</p>
+
+                {/* Skill Title */}
+                <h2 className="text-lg font-bold text-gray-800 mb-1">
+                  {skill.title}
+                </h2>
+
+                {/* Description */}
+                <p className="text-gray-500 text-sm mb-2 line-clamp-2">
+                  {skill.description}
+                </p>
+
+                {/* Instructor */}
+                <p className="text-sm text-gray-600">
+                  👤 {skill.instructorName}
+                </p>
+
+                {/* Location */}
+                <p className="text-sm text-gray-600">
+                  📍 {skill.location}
+                </p>
+
+                {/* Actions */}
                 <div className="flex gap-2 mt-auto pt-4">
+
                   <button
-                    onClick={() => navigate(`/skills/${skill.id}`)}
+                    onClick={() =>
+                      navigate(`/skills/${skill.id}`)
+                    }
                     className="flex-1 text-center text-sm bg-blue-50 text-blue-600 py-1.5 rounded-lg hover:bg-blue-100 transition"
                   >
                     View
                   </button>
-                  {isLoggedIn() && getUser()?.email === skill.ownerEmail && (
-                    <>
-                      <button
-                        onClick={() => navigate(`/edit/${skill.id}`)}
-                        className="flex-1 text-center text-sm bg-yellow-50 text-yellow-600 py-1.5 rounded-lg hover:bg-yellow-100 transition"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(skill.id)}
-                        className="flex-1 text-center text-sm bg-red-50 text-red-600 py-1.5 rounded-lg hover:bg-red-100 transition"
-                      >
-                        Delete
-                      </button>
-                    </>
-                  )}
+
+                  {isLoggedIn() &&
+                    user?.email === skill.ownerEmail && (
+                      <>
+                        <button
+                          onClick={() =>
+                            navigate(`/edit/${skill.id}`)
+                          }
+                          className="flex-1 text-center text-sm bg-yellow-50 text-yellow-600 py-1.5 rounded-lg hover:bg-yellow-100 transition"
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            handleDelete(skill.id)
+                          }
+                          className="flex-1 text-center text-sm bg-red-50 text-red-600 py-1.5 rounded-lg hover:bg-red-100 transition"
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
+
                 </div>
+
               </div>
             ))}
+
           </div>
         )}
+
       </div>
     </div>
   );

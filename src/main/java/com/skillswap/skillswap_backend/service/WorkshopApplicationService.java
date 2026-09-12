@@ -19,15 +19,18 @@ public class WorkshopApplicationService {
     private final WorkshopApplicationRepository applicationRepository;
     private final WorkshopRepository workshopRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public WorkshopApplicationService(
             WorkshopApplicationRepository applicationRepository,
             WorkshopRepository workshopRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            NotificationService notificationService) {
 
         this.applicationRepository = applicationRepository;
         this.workshopRepository = workshopRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     public WorkshopApplicationDTO applyForWorkshop(
@@ -41,7 +44,8 @@ public class WorkshopApplicationService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (workshop.getTeacher().getEmail().equals(learnerEmail)) {
-            throw new RuntimeException("You cannot apply to your own workshop");
+            throw new RuntimeException(
+                    "You cannot apply to your own workshop");
         }
 
         if (applicationRepository
@@ -70,7 +74,17 @@ public class WorkshopApplicationService {
                 .appliedAt(LocalDateTime.now())
                 .build();
 
-        return convertToDTO(applicationRepository.save(application));
+        WorkshopApplication saved =
+                applicationRepository.save(application);
+
+        // Notify the teacher that a learner applied
+        notificationService.createNotification(
+                workshop.getTeacher().getEmail(),
+                learner.getName() + " applied to your workshop: "
+                        + workshop.getTitle()
+        );
+
+        return convertToDTO(saved);
     }
 
     public List<WorkshopApplicationDTO> getMyApplications(
@@ -113,6 +127,7 @@ public class WorkshopApplicationService {
                         new RuntimeException("Application not found"));
 
         Workshop workshop = application.getWorkshop();
+        User learner = application.getLearner();
 
         if (!workshop.getTeacher().getEmail().equals(teacherEmail)) {
             throw new RuntimeException(
@@ -121,7 +136,32 @@ public class WorkshopApplicationService {
 
         application.setStatus(status);
 
-        return convertToDTO(applicationRepository.save(application));
+        WorkshopApplication saved =
+                applicationRepository.save(application);
+
+        // Notify the learner about the teacher's decision
+        String message;
+
+        if (status == ApplicationStatus.ACCEPTED) {
+            message = "Your application for the workshop \""
+                    + workshop.getTitle()
+                    + "\" has been accepted.";
+        } else if (status == ApplicationStatus.REJECTED) {
+            message = "Your application for the workshop \""
+                    + workshop.getTitle()
+                    + "\" has been rejected.";
+        } else {
+            message = "Your application for the workshop \""
+                    + workshop.getTitle()
+                    + "\" is now pending.";
+        }
+
+        notificationService.createNotification(
+                learner.getEmail(),
+                message
+        );
+
+        return convertToDTO(saved);
     }
 
     private WorkshopApplicationDTO convertToDTO(

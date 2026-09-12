@@ -59,10 +59,10 @@ export default function MyWorkshopsPage() {
 
                 <div className="flex justify-between items-center mb-6">
                     <button
-                        onClick={() => navigate('/workshops')}
+                        onClick={() => navigate('/')}
                         className="text-blue-600"
                     >
-                        ← All Workshops
+                        ← Home
                     </button>
 
                     <button
@@ -98,6 +98,7 @@ export default function MyWorkshopsPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                         {workshops.map((workshop) => (
                             <div
                                 key={workshop.id}
@@ -124,14 +125,32 @@ export default function MyWorkshopsPage() {
                                     <strong>Capacity:</strong> {workshop.capacity}
                                 </p>
 
-                                <button
-                                    onClick={() => handleDelete(workshop.id)}
-                                    className="mt-4 bg-red-50 text-red-600 px-4 py-2 rounded-lg hover:bg-red-100"
-                                >
-                                    Delete Workshop
-                                </button>
+                                <div className="flex gap-3 mt-4">
+
+                                    <button
+                                        onClick={() =>
+                                            navigate(
+                                                `/workshops/${workshop.id}/applications`
+                                            )
+                                        }
+                                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                    >
+                                        Manage Applications
+                                    </button>
+
+                                    <button
+                                        onClick={() =>
+                                            handleDelete(workshop.id)
+                                        }
+                                        className="bg-red-50 text-red-600 px-4 py-2 rounded-lg hover:bg-red-100"
+                                    >
+                                        Delete Workshop
+                                    </button>
+
+                                </div>
                             </div>
                         ))}
+
                     </div>
                 )}
 

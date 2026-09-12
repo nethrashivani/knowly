@@ -31,37 +31,49 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+   @Bean
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+            .csrf(AbstractHttpConfigurer::disable)
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .sessionManagement(session ->
+                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/ratings/user/**").permitAll()
-                        .requestMatchers("/api/ratings/**").authenticated()
+                    .requestMatchers(HttpMethod.GET, "/api/ratings/user/**").permitAll()
+                    .requestMatchers("/api/ratings/**").authenticated()
 
-                        .requestMatchers(HttpMethod.GET, "/api/profile/user/**").permitAll()
-                        .requestMatchers("/api/profile/**").authenticated()
+                    .requestMatchers(HttpMethod.GET, "/api/profile/user/**").permitAll()
+                    .requestMatchers("/api/profile/**").authenticated()
 
-                        // WORKSHOPS
-                        .requestMatchers(HttpMethod.GET, "/api/workshops/**").permitAll()
-                        .requestMatchers("/api/workshops/**").authenticated()
+                    // WORKSHOPS
+                    .requestMatchers(HttpMethod.GET, "/api/workshops/**").permitAll()
+                    .requestMatchers("/api/workshops/**").authenticated()
 
-                        .requestMatchers("/api/workshop-applications/**").authenticated()
+                    // WORKSHOP APPLICATIONS
+                    .requestMatchers("/api/workshop-applications/**").authenticated()
 
-                        .requestMatchers(HttpMethod.GET, "/api/skills/my").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/skills/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/skills/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/skills/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/skills/**").authenticated())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                    // SKILLS
+                    .requestMatchers(HttpMethod.GET, "/api/skills/my").authenticated()
+                    .requestMatchers(HttpMethod.GET, "/api/skills/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/skills/**").authenticated()
+                    .requestMatchers(HttpMethod.PUT, "/api/skills/**").authenticated()
+                    .requestMatchers(HttpMethod.DELETE, "/api/skills/**").authenticated()
 
-        return http.build();
-    }
+                    // NOTIFICATIONS
+                    .requestMatchers("/api/notifications/**").authenticated()
+
+                    .anyRequest().authenticated()
+            )
+            .addFilterBefore(
+                    jwtAuthFilter,
+                    UsernamePasswordAuthenticationFilter.class
+            );
+
+    return http.build();
+}
 
     @Bean
     public UserDetailsService userDetailsService(UserRepository userRepository) {
@@ -84,7 +96,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedOrigins(List.of("http://localhost:5174", "http://localhost:5173", "http://localhost:3000"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
