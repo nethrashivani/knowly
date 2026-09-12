@@ -31,49 +31,47 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
-   @Bean
-public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-            .csrf(AbstractHttpConfigurer::disable)
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .sessionManagement(session ->
-                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
-                    .requestMatchers(HttpMethod.GET, "/api/ratings/user/**").permitAll()
-                    .requestMatchers("/api/ratings/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/ratings/user/**").permitAll()
+                        .requestMatchers("/api/ratings/**").authenticated()
 
-                    .requestMatchers(HttpMethod.GET, "/api/profile/user/**").permitAll()
-                    .requestMatchers("/api/profile/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/profile/user/**").permitAll()
+                        .requestMatchers("/api/profile/**").authenticated()
 
-                    // WORKSHOPS
-                    .requestMatchers(HttpMethod.GET, "/api/workshops/**").permitAll()
-                    .requestMatchers("/api/workshops/**").authenticated()
+                        // WORKSHOPS
+                        .requestMatchers(HttpMethod.GET, "/api/workshops/**").permitAll()
+                        .requestMatchers("/api/workshops/**").authenticated()
 
-                    // WORKSHOP APPLICATIONS
-                    .requestMatchers("/api/workshop-applications/**").authenticated()
+                        // WORKSHOP APPLICATIONS
+                        .requestMatchers("/api/workshop-applications/**").authenticated()
 
-                    // SKILLS
-                    .requestMatchers(HttpMethod.GET, "/api/skills/my").authenticated()
-                    .requestMatchers(HttpMethod.GET, "/api/skills/**").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/skills/**").authenticated()
-                    .requestMatchers(HttpMethod.PUT, "/api/skills/**").authenticated()
-                    .requestMatchers(HttpMethod.DELETE, "/api/skills/**").authenticated()
+                        // SKILLS
+                        .requestMatchers(HttpMethod.GET, "/api/skills/my").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/skills/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/skills/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/skills/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/skills/**").authenticated()
 
-                    // NOTIFICATIONS
-                    .requestMatchers("/api/notifications/**").authenticated()
+                        // NOTIFICATIONS
+                        .requestMatchers("/api/notifications/**").authenticated()
+                        .requestMatchers("/api/skill-interests/**").authenticated()
 
-                    .anyRequest().authenticated()
-            )
-            .addFilterBefore(
-                    jwtAuthFilter,
-                    UsernamePasswordAuthenticationFilter.class
-            );
+                        .anyRequest().authenticated())
+                .addFilterBefore(
+                        jwtAuthFilter,
+                        UsernamePasswordAuthenticationFilter.class);
 
-    return http.build();
-}
+        return http.build();
+    }
 
     @Bean
     public UserDetailsService userDetailsService(UserRepository userRepository) {

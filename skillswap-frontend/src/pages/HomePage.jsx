@@ -1,382 +1,262 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  getAllSkills,
-  searchSkills,
-  getSkillsByCategory,
-  getOtherSkills,
-  deleteSkill
-} from '../services/skillService';
-import { isLoggedIn, getUser, logout } from '../services/authService';
-import NotificationBell from '../components/NotificationBell';
-
-const CATEGORIES = [
-  'All',
-  'Technology',
-  'Music',
-  'Art',
-  'Language',
-  'Sports',
-  'Cooking',
-  'Other'
-];
+import { getAllWorkshops } from '../services/workshopService';
+import Navbar from '../components/Navbar';
 
 export default function HomePage() {
-  const [skills, setSkills] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [keyword, setKeyword] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-
   const navigate = useNavigate();
-  const user = getUser();
 
-  const fetchSkills = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError('');
-
-      const data = await getAllSkills();
-      setSkills(data);
-    } catch (_err) {
-      setError('Failed to load skills.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [workshops, setWorkshops] = useState([]);
+  const [loadingWorkshops, setLoadingWorkshops] = useState(true);
 
   useEffect(() => {
-    fetchSkills();
-  }, [fetchSkills]);
-
-  const handleSearch = async () => {
-    if (!keyword.trim()) {
-      return fetchSkills();
-    }
-
-    try {
-      setLoading(true);
-      setError('');
-
-      const data = await searchSkills(keyword);
-      setSkills(data);
-    } catch (_err) {
-      setError('Search failed.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCategoryFilter = async (category) => {
-    setSelectedCategory(category);
-
-    try {
-      setLoading(true);
-      setError('');
-
-      if (category === 'All') {
-        const data = await getAllSkills();
-        setSkills(data);
-      } else if (category === 'Other') {
-        const data = await getOtherSkills();
-        setSkills(data);
-      } else {
-        const data = await getSkillsByCategory(category);
-        setSkills(data);
+    const loadWorkshops = async () => {
+      try {
+        const data = await getAllWorkshops();
+        setWorkshops(data);
+      } catch {
+        setWorkshops([]);
+      } finally {
+        setLoadingWorkshops(false);
       }
-    } catch (_err) {
-      setError('Filter failed.');
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    loadWorkshops();
+  }, []);
+
+  const formatDate = (dateTime) => {
+    const date = new Date(dateTime);
+
+    return date.toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this skill?')) {
-      return;
-    }
+  const formatTime = (dateTime) => {
+    const date = new Date(dateTime);
 
-    try {
-      await deleteSkill(id);
-
-      setSkills((prev) =>
-        prev.filter((skill) => skill.id !== id)
-      );
-    } catch (_err) {
-      setError('Delete failed.');
-    }
+    return date.toLocaleTimeString('en-IN', {
+      hour: 'numeric',
+      minute: '2-digit'
+    });
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
 
-      {/* Header */}
-      <div className="bg-blue-600 text-white py-8 px-4 text-center relative">
+      {/* Shared Navbar */}
+      <Navbar />
 
-        {/* Navigation */}
-        <div className="absolute top-4 right-4 flex items-center gap-2">
+      {/* Main */}
+      <main className="max-w-6xl mx-auto px-4 py-10">
 
-          {isLoggedIn() ? (
-            <>
-              {/* User */}
-              <span className="text-sm text-blue-100 mr-1">
-                👤 {user?.name}
-              </span>
+        {/* Welcome Section */}
+        <section className="bg-white rounded-xl border border-gray-200 px-6 py-10 text-center">
 
-              {/* Notifications */}
-              <NotificationBell />
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+            Learn from people.
+            <br />
+            <span className="text-blue-600">
+              Share what you know.
+            </span>
+          </h1>
 
-              {/* My Skills */}
+          <p className="mt-4 text-gray-500 max-w-xl mx-auto">
+            Discover skills offered by people around you and find workshops
+            where you can learn something new.
+          </p>
+
+          {/* Search */}
+          <div className="max-w-2xl mx-auto mt-7">
+            <div className="flex gap-2">
+
+              <input
+                type="text"
+                placeholder="What do you want to learn?"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    navigate('/skills');
+                  }
+                }}
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+
               <button
-                onClick={() => navigate('/my-skills')}
-                className="text-sm bg-blue-500 border border-white text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
+                onClick={() => navigate('/skills')}
+                className="bg-blue-600 text-white px-5 rounded-lg hover:bg-blue-700 transition"
               >
-                My Skills
+                Search
               </button>
 
-              {/* Profile */}
-              <button
-                onClick={() => navigate('/profile')}
-                className="text-sm bg-blue-500 border border-white text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
-              >
-                Profile
-              </button>
+            </div>
+          </div>
 
-              {/* Workshops */}
+        </section>
+
+        {/* Quick Actions */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-7">
+
+          <button
+            onClick={() => navigate('/skills')}
+            className="bg-white border border-gray-200 rounded-xl p-6 text-left hover:border-blue-300 hover:shadow-sm transition"
+          >
+            <h2 className="text-xl font-semibold text-gray-900">
+              Explore Skills
+            </h2>
+
+            <p className="text-sm text-gray-500 mt-2">
+              Find people who can teach you something you're interested in.
+            </p>
+
+            <span className="inline-block mt-4 text-sm font-medium text-blue-600">
+              Browse skills →
+            </span>
+          </button>
+
+          <button
+            onClick={() => navigate('/workshops')}
+            className="bg-white border border-gray-200 rounded-xl p-6 text-left hover:border-blue-300 hover:shadow-sm transition"
+          >
+            <h2 className="text-xl font-semibold text-gray-900">
+              Browse Workshops
+            </h2>
+
+            <p className="text-sm text-gray-500 mt-2">
+              Find upcoming workshops and apply to learn from others.
+            </p>
+
+            <span className="inline-block mt-4 text-sm font-medium text-blue-600">
+              View workshops →
+            </span>
+          </button>
+
+        </section>
+
+        {/* Upcoming Workshops */}
+        <section className="mt-10">
+
+          <div className="flex items-center justify-between mb-5">
+
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Upcoming Workshops
+              </h2>
+
+              <p className="text-sm text-gray-500 mt-1">
+                Learn something new from people in the community.
+              </p>
+            </div>
+
+            <button
+              onClick={() => navigate('/workshops')}
+              className="text-sm font-medium text-blue-600 hover:text-blue-700"
+            >
+              View all
+            </button>
+
+          </div>
+
+          {loadingWorkshops ? (
+            <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-400">
+              Loading workshops...
+            </div>
+          ) : workshops.length === 0 ? (
+            <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
+
+              <p className="text-gray-500">
+                No upcoming workshops yet.
+              </p>
+
               <button
                 onClick={() => navigate('/workshops')}
-                className="text-sm bg-blue-500 border border-white text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
+                className="mt-3 text-sm text-blue-600 font-medium"
               >
-                Workshops
+                Browse workshops
               </button>
 
-              {/* My Workshops */}
-              <button
-                onClick={() => navigate('/my-workshops')}
-                className="text-sm bg-blue-500 border border-white text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
-              >
-                My Workshops
-              </button>
-
-              {/* My Applications */}
-              <button
-                onClick={() => navigate('/my-applications')}
-                className="text-sm bg-blue-500 border border-white text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
-              >
-                My Applications
-              </button>
-
-              {/* Logout */}
-              <button
-                onClick={() => {
-                  logout();
-                  navigate('/login');
-                }}
-                className="text-sm bg-white text-blue-600 px-3 py-1 rounded-full hover:bg-blue-50 transition"
-              >
-                Logout
-              </button>
-            </>
+            </div>
           ) : (
-            <>
-              {/* Login */}
-              <button
-                onClick={() => navigate('/login')}
-                className="text-sm bg-white text-blue-600 px-3 py-1 rounded-full hover:bg-blue-50 transition"
-              >
-                Login
-              </button>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
 
-              {/* Register */}
-              <button
-                onClick={() => navigate('/register')}
-                className="text-sm border border-white text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
-              >
-                Register
-              </button>
-            </>
-          )}
+              {workshops.slice(0, 3).map((workshop) => (
+                <div
+                  key={workshop.id}
+                  className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-sm transition"
+                >
 
-        </div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {workshop.title}
+                  </h3>
 
-        {/* Logo / Title */}
-        <h1 className="text-4xl font-bold mb-2">
-          SkillSwap
-        </h1>
+                  <p className="text-sm text-gray-500 mt-2 line-clamp-2">
+                    {workshop.description}
+                  </p>
 
-        <p className="text-blue-100">
-          Discover and share skills with others
-        </p>
+                  <div className="mt-4 space-y-2 text-sm text-gray-600">
 
-        {/* Add Skill */}
-        {isLoggedIn() && (
-          <button
-            onClick={() => navigate('/add')}
-            className="mt-4 bg-white text-blue-600 font-semibold px-6 py-2 rounded-full hover:bg-blue-50 transition"
-          >
-            + Add Your Skill
-          </button>
-        )}
+                    <p>
+                      <span className="font-medium">Date:</span>{' '}
+                      {formatDate(workshop.dateTime)}
+                    </p>
 
-      </div>
+                    <p>
+                      <span className="font-medium">Time:</span>{' '}
+                      {formatTime(workshop.dateTime)}
+                    </p>
 
-      {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-6">
+                    <p>
+                      <span className="font-medium">Location:</span>{' '}
+                      {workshop.location}
+                    </p>
 
-        {/* Search Bar */}
-        <div className="flex gap-2 mb-6">
+                    <p>
+                      <span className="font-medium">Seats:</span>{' '}
+                      {workshop.capacity}
+                    </p>
 
-          <input
-            type="text"
-            placeholder="Search skills..."
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onKeyDown={(e) =>
-              e.key === 'Enter' && handleSearch()
-            }
-            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-
-          <button
-            onClick={handleSearch}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
-          >
-            Search
-          </button>
-
-          <button
-            onClick={() => {
-              setKeyword('');
-              fetchSkills();
-            }}
-            className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
-          >
-            Clear
-          </button>
-
-        </div>
-
-        {/* Category Filter */}
-        <div className="flex flex-wrap gap-2 mb-6">
-
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => handleCategoryFilter(cat)}
-              className={`px-4 py-1 rounded-full text-sm font-medium transition ${
-                selectedCategory === cat
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white border border-gray-300 text-gray-600 hover:bg-blue-50'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-
-        </div>
-
-        {/* Error */}
-        {error && (
-          <div className="bg-red-100 text-red-700 px-4 py-2 rounded mb-4">
-            {error}
-          </div>
-        )}
-
-        {/* Skills */}
-        {loading ? (
-          <div className="text-center py-20 text-gray-400 text-lg">
-            Loading skills...
-          </div>
-        ) : skills.length === 0 ? (
-          <div className="text-center py-20 text-gray-400 text-lg">
-            No skills found.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
-            {skills.map((skill) => (
-              <div
-                key={skill.id}
-                className="bg-white rounded-xl shadow hover:shadow-md transition p-5 flex flex-col justify-between"
-              >
-
-                {/* Skill Header */}
-                <div className="flex justify-between items-start mb-2">
-
-                  <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-medium">
-                    {skill.category}
-                  </span>
-
-                  <span className="text-xs text-gray-400">
-                    {skill.experienceYears} yrs exp
-                  </span>
-
-                </div>
-
-                {/* Skill Title */}
-                <h2 className="text-lg font-bold text-gray-800 mb-1">
-                  {skill.title}
-                </h2>
-
-                {/* Description */}
-                <p className="text-gray-500 text-sm mb-2 line-clamp-2">
-                  {skill.description}
-                </p>
-
-                {/* Instructor */}
-                <p className="text-sm text-gray-600">
-                  👤 {skill.instructorName}
-                </p>
-
-                {/* Location */}
-                <p className="text-sm text-gray-600">
-                  📍 {skill.location}
-                </p>
-
-                {/* Actions */}
-                <div className="flex gap-2 mt-auto pt-4">
+                  </div>
 
                   <button
-                    onClick={() =>
-                      navigate(`/skills/${skill.id}`)
-                    }
-                    className="flex-1 text-center text-sm bg-blue-50 text-blue-600 py-1.5 rounded-lg hover:bg-blue-100 transition"
+                    onClick={() => navigate('/workshops')}
+                    className="w-full mt-5 bg-blue-50 text-blue-600 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition"
                   >
-                    View
+                    View Workshop
                   </button>
 
-                  {isLoggedIn() &&
-                    user?.email === skill.ownerEmail && (
-                      <>
-                        <button
-                          onClick={() =>
-                            navigate(`/edit/${skill.id}`)
-                          }
-                          className="flex-1 text-center text-sm bg-yellow-50 text-yellow-600 py-1.5 rounded-lg hover:bg-yellow-100 transition"
-                        >
-                          Edit
-                        </button>
-
-                        <button
-                          onClick={() =>
-                            handleDelete(skill.id)
-                          }
-                          className="flex-1 text-center text-sm bg-red-50 text-red-600 py-1.5 rounded-lg hover:bg-red-100 transition"
-                        >
-                          Delete
-                        </button>
-                      </>
-                    )}
-
                 </div>
+              ))}
 
-              </div>
-            ))}
+            </div>
+          )}
 
+        </section>
+
+        {/* Offer Skill */}
+        <section className="mt-10 mb-8 bg-white border border-gray-200 rounded-xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Have a skill to share?
+            </h2>
+
+            <p className="text-sm text-gray-500 mt-1">
+              Offer your skill and help someone learn.
+            </p>
           </div>
-        )}
 
-      </div>
+          <button
+            onClick={() => navigate('/add')}
+            className="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+          >
+            Offer a Skill
+          </button>
+
+        </section>
+
+      </main>
+
     </div>
   );
 }

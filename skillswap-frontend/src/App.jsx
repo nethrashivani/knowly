@@ -1,20 +1,26 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
 import HomePage from './pages/HomePage';
 import AddSkillPage from './pages/AddSkillPage';
 import EditSkillPage from './pages/EditSkillPage';
 import SkillDetailsPage from './pages/SkillDetailsPage';
+import SkillDemandPage from './pages/SkillDemandPage';
+
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
-import MySkillsPage from './pages/MySkillsPage';
-import { isLoggedIn } from './services/authService';
 import PublicProfilePage from './pages/PublicProfilePage';
+import MySkillsPage from './pages/MySkillsPage';
+
+import SkillsPage from './pages/SkillsPage';
+
 import WorkshopsPage from './pages/WorkshopsPage';
 import CreateWorkshopPage from './pages/CreateWorkshopPage';
 import MyWorkshopsPage from './pages/MyWorkshopsPage';
 import MyApplicationsPage from './pages/MyApplicationsPage';
 import ManageApplicationsPage from './pages/ManageApplicationsPage';
 
+import { isLoggedIn } from './services/authService';
 
 function ProtectedRoute({ children }) {
   return isLoggedIn() ? children : <Navigate to="/login" />;
@@ -24,19 +30,106 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+
+        {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-        <Route path="/add" element={<ProtectedRoute><AddSkillPage /></ProtectedRoute>} />
-        <Route path="/edit/:id" element={<ProtectedRoute><EditSkillPage /></ProtectedRoute>} />
-        <Route path="/skills/:id" element={<ProtectedRoute><SkillDetailsPage /></ProtectedRoute>} />
-        <Route path="/my-skills" element={<ProtectedRoute><MySkillsPage /></ProtectedRoute>} />
+
+        {/* Home */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Profile */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Skills */}
+        <Route
+          path="/skills"
+          element={
+            <ProtectedRoute>
+              <SkillsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/skills/:id"
+          element={
+            <ProtectedRoute>
+              <SkillDetailsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Skill Demand */}
+        <Route
+          path="/skills/:id/demand"
+          element={
+            <ProtectedRoute>
+              <SkillDemandPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/add"
+          element={
+            <ProtectedRoute>
+              <AddSkillPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/edit/:id"
+          element={
+            <ProtectedRoute>
+              <EditSkillPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/my-skills"
+          element={
+            <ProtectedRoute>
+              <MySkillsPage />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/users/:userId"
-          element={<ProtectedRoute><PublicProfilePage /></ProtectedRoute>}
+          element={
+            <ProtectedRoute>
+              <PublicProfilePage />
+            </ProtectedRoute>
+          }
         />
-        <Route path="/workshops" element={<WorkshopsPage />} />
+
+        {/* Workshops */}
+        <Route
+          path="/workshops"
+          element={
+            <ProtectedRoute>
+              <WorkshopsPage />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/workshops/create"
           element={
@@ -73,9 +166,7 @@ function App() {
           }
         />
 
-
       </Routes>
-
     </BrowserRouter>
   );
 }

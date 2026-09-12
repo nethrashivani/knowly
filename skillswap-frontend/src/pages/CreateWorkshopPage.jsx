@@ -1,9 +1,16 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { createWorkshop } from '../services/workshopService';
 
 export default function CreateWorkshopPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // If we came from a skill, this will contain something like /skills/14.
+  // Otherwise, default to the main Workshops page.
+  const returnTo = location.state?.returnTo || '/workshops';
+
+  const isSkillFlow = returnTo.startsWith('/skills/');
 
   const [formData, setFormData] = useState({
     title: '',
@@ -38,7 +45,7 @@ export default function CreateWorkshopPage() {
         dateTime: formData.dateTime
       });
 
-      navigate('/workshops');
+      navigate(returnTo);
     } catch (err) {
       console.error(err);
 
@@ -57,10 +64,12 @@ export default function CreateWorkshopPage() {
       <div className="max-w-2xl mx-auto bg-white rounded-xl shadow p-6">
 
         <button
-          onClick={() => navigate('/workshops')}
+          onClick={() => navigate(returnTo)}
           className="text-blue-600 mb-4"
         >
-          ← Back to Workshops
+          {isSkillFlow
+            ? '← Back to Skill'
+            : '← Back to Workshops'}
         </button>
 
         <h1 className="text-3xl font-bold text-gray-800 mb-6">
@@ -79,6 +88,7 @@ export default function CreateWorkshopPage() {
             <label className="block font-medium mb-1">
               Workshop Title
             </label>
+
             <input
               type="text"
               name="title"
@@ -94,6 +104,7 @@ export default function CreateWorkshopPage() {
             <label className="block font-medium mb-1">
               Description
             </label>
+
             <textarea
               name="description"
               value={formData.description}
@@ -108,6 +119,7 @@ export default function CreateWorkshopPage() {
             <label className="block font-medium mb-1">
               Date & Time
             </label>
+
             <input
               type="datetime-local"
               name="dateTime"
@@ -122,6 +134,7 @@ export default function CreateWorkshopPage() {
             <label className="block font-medium mb-1">
               Location
             </label>
+
             <input
               type="text"
               name="location"
@@ -137,6 +150,7 @@ export default function CreateWorkshopPage() {
             <label className="block font-medium mb-1">
               Capacity
             </label>
+
             <input
               type="number"
               name="capacity"
