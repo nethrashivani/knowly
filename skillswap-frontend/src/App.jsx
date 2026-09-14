@@ -20,12 +20,13 @@ import CreateWorkshopPage from './pages/CreateWorkshopPage';
 import MyWorkshopsPage from './pages/MyWorkshopsPage';
 import MyApplicationsPage from './pages/MyApplicationsPage';
 import ManageApplicationsPage from './pages/ManageApplicationsPage';
-
+import WorkshopResourcesPage from './pages/WorkshopResourcesPage';
 import { isLoggedIn } from './services/authService';
 
 function ProtectedRoute({ children }) {
   return isLoggedIn() ? children : <Navigate to="/login" />;
 }
+
 
 function App() {
   return (
@@ -181,6 +182,14 @@ function App() {
           }
         />
 
+        <Route
+          path="/workshops/:workshopId/resources"
+          element={<WorkshopResourcesPage />}
+        />
+        <Route
+          path="/my-applications/:applicationId"
+          element={<MyApplicationsPage />}
+        />
       </Routes>
     </BrowserRouter>
   );

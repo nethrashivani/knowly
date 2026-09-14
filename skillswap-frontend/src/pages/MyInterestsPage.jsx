@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 import {
   getMyInterests,
@@ -10,8 +11,6 @@ import { getMyApplications } from '../services/workshopApplicationService';
 
 import Navbar from '../components/Navbar';
 
-/* eslint-disable react-hooks/set-state-in-effect */
-
 export default function MyInterestsPage() {
   const [interests, setInterests] = useState([]);
   const [applications, setApplications] = useState([]);
@@ -21,30 +20,30 @@ export default function MyInterestsPage() {
 
   const navigate = useNavigate();
 
-  const fetchMyInterests = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError('');
-
-      const [skillInterests, workshopApplications] =
-        await Promise.all([
-          getMyInterests(),
-          getMyApplications()
-        ]);
-
-      setInterests(skillInterests);
-      setApplications(workshopApplications);
-    } catch (err) {
-      console.error(err);
-      setError('Failed to load your interests.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    fetchMyInterests();
-  }, [fetchMyInterests]);
+    const loadMyInterests = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const [skillInterests, workshopApplications] =
+          await Promise.all([
+            getMyInterests(),
+            getMyApplications()
+          ]);
+
+        setInterests(skillInterests);
+        setApplications(workshopApplications);
+      } catch (err) {
+        console.error(err);
+        setError('Failed to load your interests.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMyInterests();
+  }, []);
 
   const handleRemoveInterest = async (skillId) => {
     if (
@@ -128,7 +127,6 @@ export default function MyInterestsPage() {
 
         {/* Heading */}
         <div className="mb-10">
-
           <h1 className="text-3xl font-bold text-gray-900">
             My Interests
           </h1>
@@ -136,7 +134,6 @@ export default function MyInterestsPage() {
           <p className="text-gray-500 mt-1">
             Skills and workshops you're interested in on Knowly.
           </p>
-
         </div>
 
         {/* Error */}
@@ -224,7 +221,9 @@ export default function MyInterestsPage() {
 
                     <button
                       onClick={() =>
-                        navigate(`/skills/${interest.skillId}`)
+                        navigate(
+                          `/skills/${interest.skillId}`
+                        )
                       }
                       className="text-sm bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition"
                     >
@@ -233,7 +232,9 @@ export default function MyInterestsPage() {
 
                     <button
                       onClick={() =>
-                        handleRemoveInterest(interest.skillId)
+                        handleRemoveInterest(
+                          interest.skillId
+                        )
                       }
                       className="text-sm bg-red-50 text-red-600 py-2 rounded-lg hover:bg-red-100 transition"
                     >
@@ -264,7 +265,8 @@ export default function MyInterestsPage() {
               </h2>
 
               <p className="text-gray-500 mt-1">
-                Workshops you've applied for and their current status.
+                Workshops you've applied for and their current
+                status.
               </p>
             </div>
 
@@ -340,13 +342,12 @@ export default function MyInterestsPage() {
                   <div className="mt-4">
 
                     <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                        application.status === 'ACCEPTED'
+                      className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${application.status === 'ACCEPTED'
                           ? 'bg-green-100 text-green-700'
                           : application.status === 'REJECTED'
                             ? 'bg-red-100 text-red-700'
                             : 'bg-yellow-100 text-yellow-700'
-                      }`}
+                        }`}
                     >
                       {application.status}
                     </span>
@@ -355,14 +356,16 @@ export default function MyInterestsPage() {
 
                   {application.status === 'ACCEPTED' && (
                     <p className="text-sm text-green-700 mt-3">
-                      Your application has been accepted. You can
-                      attend this workshop.
+                      Your application has been accepted.
+                      You can attend this workshop.
                     </p>
                   )}
 
                   <button
                     onClick={() =>
-                      navigate('/my-applications')
+                      navigate(
+                        `/my-applications/${application.id}`
+                      )
                     }
                     className="mt-5 w-full text-sm bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition"
                   >

@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getMyInterests } from '../services/skillInterestService';
+import { useNavigate, useParams } from 'react-router-dom';
 import { getMyApplications } from '../services/workshopApplicationService';
 import Navbar from '../components/Navbar';
 
 export default function MyApplicationsPage() {
     const navigate = useNavigate();
+    const { applicationId } = useParams();
 
-    const [activeTab, setActiveTab] = useState('skills');
-    const [skillApplications, setSkillApplications] = useState([]);
     const [workshopApplications, setWorkshopApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -16,13 +14,8 @@ export default function MyApplicationsPage() {
     useEffect(() => {
         const loadApplications = async () => {
             try {
-                const [skills, workshops] = await Promise.all([
-                    getMyInterests(),
-                    getMyApplications()
-                ]);
-
-                setSkillApplications(skills);
-                setWorkshopApplications(workshops);
+                const applications = await getMyApplications();
+                setWorkshopApplications(applications);
             } catch (err) {
                 console.error(err);
                 setError('Failed to load your applications.');
@@ -47,12 +40,16 @@ export default function MyApplicationsPage() {
     };
 
     const formatDate = (dateTime) => {
-        return new Date(dateTime).toLocaleDateString();
+        return new Date(dateTime).toLocaleDateString('en-IN', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
     };
 
     const formatTime = (dateTime) => {
-        return new Date(dateTime).toLocaleTimeString([], {
-            hour: '2-digit',
+        return new Date(dateTime).toLocaleTimeString('en-IN', {
+            hour: 'numeric',
             minute: '2-digit'
         });
     };
@@ -71,6 +68,54 @@ export default function MyApplicationsPage() {
         );
     }
 
+    /*
+     * If an applicationId exists in the URL,
+     * show ONLY that application.
+     *
+     * Otherwise, show all applications.
+     */
+    const selectedApplication = applicationId
+        ? workshopApplications.find(
+              (application) =>
+                  application.id === Number(applicationId)
+          )
+        : null;
+
+    if (applicationId && !selectedApplication) {
+        return (
+            <>
+                <Navbar />
+
+                <div className="min-h-screen bg-gray-50 px-4 py-8">
+                    <div className="max-w-5xl mx-auto">
+
+                        <button
+                            onClick={() => navigate('/my-interests')}
+                            className="text-blue-600 hover:text-blue-800 mb-6"
+                        >
+                            ← Back to My Interests
+                        </button>
+
+                        <div className="bg-white rounded-xl shadow p-8 text-center">
+                            <h1 className="text-2xl font-bold text-gray-800">
+                                Application Not Found
+                            </h1>
+
+                            <p className="text-gray-500 mt-2">
+                                This workshop application could not be found.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+            </>
+        );
+    }
+
+    const applicationsToDisplay = selectedApplication
+        ? [selectedApplication]
+        : workshopApplications;
+
     return (
         <>
             <Navbar />
@@ -79,15 +124,31 @@ export default function MyApplicationsPage() {
                 <div className="max-w-5xl mx-auto">
 
                     <button
-                        onClick={() => navigate('/')}
+                        onClick={() =>
+                            navigate(
+                                selectedApplication
+                                    ? '/my-interests'
+                                    : '/'
+                            )
+                        }
                         className="text-blue-600 hover:text-blue-800 mb-6"
                     >
-                        ← Home
+                        {selectedApplication
+                            ? '← Back to My Interests'
+                            : '← Back to Home'}
                     </button>
 
-                    <h1 className="text-3xl font-bold text-gray-800 mb-6">
-                        My Applications
+                    <h1 className="text-3xl font-bold text-gray-800">
+                        {selectedApplication
+                            ? 'Application Details'
+                            : 'My Applications'}
                     </h1>
+
+                    <p className="text-gray-500 mt-2 mb-6">
+                        {selectedApplication
+                            ? 'Details of your workshop application.'
+                            : "Workshops you've applied to and the status of your applications."}
+                    </p>
 
                     {error && (
                         <div className="bg-red-100 text-red-700 px-4 py-3 rounded-lg mb-6">
@@ -95,223 +156,157 @@ export default function MyApplicationsPage() {
                         </div>
                     )}
 
-                    {/* Tabs */}
-                    <div className="bg-white rounded-xl shadow mb-6">
-                        <div className="flex border-b">
+                    {applicationsToDisplay.length === 0 ? (
+
+                        <div className="bg-white rounded-xl shadow p-8 text-center">
+
+                            <p className="text-gray-500">
+                                You haven't applied to any workshops yet.
+                            </p>
 
                             <button
-                                onClick={() => setActiveTab('skills')}
-                                className={`flex-1 px-6 py-4 font-semibold ${
-                                    activeTab === 'skills'
-                                        ? 'text-blue-600 border-b-2 border-blue-600'
-                                        : 'text-gray-500 hover:text-gray-700'
-                                }`}
+                                onClick={() => navigate('/workshops')}
+                                className="mt-4 text-blue-600 hover:text-blue-800 font-semibold"
                             >
-                                Skills
-                                <span className="ml-2 text-sm">
-                                    ({skillApplications.length})
-                                </span>
-                            </button>
-
-                            <button
-                                onClick={() => setActiveTab('workshops')}
-                                className={`flex-1 px-6 py-4 font-semibold ${
-                                    activeTab === 'workshops'
-                                        ? 'text-blue-600 border-b-2 border-blue-600'
-                                        : 'text-gray-500 hover:text-gray-700'
-                                }`}
-                            >
-                                Workshops
-                                <span className="ml-2 text-sm">
-                                    ({workshopApplications.length})
-                                </span>
+                                Explore Workshops
                             </button>
 
                         </div>
-                    </div>
 
-                    {/* Skills */}
-                    {activeTab === 'skills' && (
-                        <div>
-                            <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                                Skills I'm Interested In
-                            </h2>
+                    ) : (
 
-                            {skillApplications.length === 0 ? (
-                                <div className="bg-white rounded-xl shadow p-8 text-center">
-                                    <p className="text-gray-500">
-                                        You haven't expressed interest in any
-                                        skills yet.
-                                    </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                                    <button
-                                        onClick={() => navigate('/skills')}
-                                        className="mt-4 text-blue-600 hover:text-blue-800 font-semibold"
+                            {applicationsToDisplay.map((application) => {
+
+                                const workshopDate = new Date(
+                                    application.workshopDateTime
+                                );
+
+                                const hasPassed =
+                                    workshopDate < new Date();
+
+                                return (
+                                    <div
+                                        key={application.id}
+                                        className="bg-white rounded-xl shadow p-5"
                                     >
-                                        Explore Skills
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {skillApplications.map((skill) => (
-                                        <div
-                                            key={skill.interestId}
-                                            className="bg-white rounded-xl shadow p-5"
-                                        >
-                                            <h3 className="text-xl font-bold text-gray-800">
-                                                {skill.skillTitle}
-                                            </h3>
 
-                                            <p className="text-gray-600 mt-2">
-                                                Offered by: {skill.ownerName}
-                                            </p>
+                                        <h3 className="text-xl font-bold text-gray-800">
+                                            {application.workshopTitle}
+                                        </h3>
 
-                                            <p className="text-sm text-gray-500 mt-2">
-                                                Interested on:{' '}
-                                                {new Date(
-                                                    skill.createdAt
-                                                ).toLocaleString()}
-                                            </p>
+                                        <p className="text-gray-600 mt-2">
+                                            Hosted by:{' '}
+                                            {application.teacherName}
+                                        </p>
 
-                                            <button
-                                                onClick={() =>
-                                                    navigate(
-                                                        `/skills/${skill.skillId}`
-                                                    )
-                                                }
-                                                className="mt-4 text-blue-600 hover:text-blue-800 font-semibold"
+                                        <p className="text-gray-600 mt-1">
+                                            Date:{' '}
+                                            {formatDate(
+                                                application.workshopDateTime
+                                            )}
+                                        </p>
+
+                                        <p className="text-gray-600 mt-1">
+                                            Time:{' '}
+                                            {formatTime(
+                                                application.workshopDateTime
+                                            )}
+                                        </p>
+
+                                        <p className="text-gray-600 mt-1">
+                                            Location:{' '}
+                                            {application.location}
+                                        </p>
+
+                                        <div className="mt-4">
+
+                                            <span className="font-semibold text-gray-700">
+                                                Status:{' '}
+                                            </span>
+
+                                            <span
+                                                className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${getStatusClass(
+                                                    application.status
+                                                )}`}
                                             >
-                                                View Skill →
-                                            </button>
+                                                {application.status}
+                                            </span>
+
                                         </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
 
-                    {/* Workshops */}
-                    {activeTab === 'workshops' && (
-                        <div>
-                            <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                                Workshops I've Applied To
-                            </h2>
+                                        {application.status === 'ACCEPTED' && (
+                                            <>
+                                                <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-3">
 
-                            {workshopApplications.length === 0 ? (
-                                <div className="bg-white rounded-xl shadow p-8 text-center">
-                                    <p className="text-gray-500">
-                                        You haven't applied to any workshops yet.
-                                    </p>
+                                                    <p className="text-green-700 font-medium">
+                                                        Your application has
+                                                        been accepted. You can
+                                                        attend this workshop.
+                                                    </p>
 
-                                    <button
-                                        onClick={() => navigate('/workshops')}
-                                        className="mt-4 text-blue-600 hover:text-blue-800 font-semibold"
-                                    >
-                                        Explore Workshops
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {workshopApplications.map((application) => {
-                                        const workshopDate = new Date(
-                                            application.workshopDateTime
-                                        );
-
-                                        const hasPassed =
-                                            workshopDate < new Date();
-
-                                        return (
-                                            <div
-                                                key={application.id}
-                                                className="bg-white rounded-xl shadow p-5"
-                                            >
-                                                <h3 className="text-xl font-bold text-gray-800">
-                                                    {application.workshopTitle}
-                                                </h3>
-
-                                                <p className="text-gray-600 mt-2">
-                                                    Hosted by:{' '}
-                                                    {application.teacherName}
-                                                </p>
-
-                                                <p className="text-gray-600 mt-1">
-                                                    Date:{' '}
-                                                    {formatDate(
-                                                        application.workshopDateTime
+                                                    {hasPassed && (
+                                                        <p className="text-green-700 text-sm mt-2">
+                                                            This workshop has
+                                                            ended. You can rate
+                                                            your experience.
+                                                        </p>
                                                     )}
-                                                </p>
 
-                                                <p className="text-gray-600 mt-1">
-                                                    Time:{' '}
-                                                    {formatTime(
-                                                        application.workshopDateTime
-                                                    )}
-                                                </p>
-
-                                                <p className="text-gray-600 mt-1">
-                                                    Location:{' '}
-                                                    {application.location}
-                                                </p>
-
-                                                <div className="mt-4">
-                                                    <span className="font-semibold text-gray-700">
-                                                        Status:{' '}
-                                                    </span>
-
-                                                    <span
-                                                        className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${getStatusClass(
-                                                            application.status
-                                                        )}`}
-                                                    >
-                                                        {application.status}
-                                                    </span>
                                                 </div>
 
-                                                {application.status === 'ACCEPTED' && (
-                                                    <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-3">
-                                                        <p className="text-green-700 font-medium">
-                                                            Your application has
-                                                            been accepted. You
-                                                            can attend this
-                                                            workshop.
-                                                        </p>
+                                                <button
+                                                    onClick={() =>
+                                                        navigate(
+                                                            `/workshops/${application.workshopId}/resources`
+                                                        )
+                                                    }
+                                                    className="w-full mt-4 bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+                                                >
+                                                    Learning Resources
+                                                </button>
 
-                                                        {hasPassed && (
-                                                            <p className="text-green-700 text-sm mt-2">
-                                                                This workshop has
-                                                                ended. You can
-                                                                rate your
-                                                                experience.
-                                                            </p>
-                                                        )}
-                                                    </div>
+                                                {hasPassed && (
+                                                    <button
+                                                        onClick={() =>
+                                                            navigate(
+                                                                `/workshops/${application.workshopId}/rate`
+                                                            )
+                                                        }
+                                                        className="w-full mt-2 bg-yellow-500 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-yellow-600 transition"
+                                                    >
+                                                        Rate Workshop
+                                                    </button>
                                                 )}
 
-                                                {application.status === 'REJECTED' && (
-                                                    <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
-                                                        <p className="text-red-700">
-                                                            Your application was
-                                                            not accepted for this
-                                                            workshop.
-                                                        </p>
-                                                    </div>
-                                                )}
+                                            </>
+                                        )}
 
-                                                {application.status === 'PENDING' && (
-                                                    <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                                                        <p className="text-yellow-700">
-                                                            Your application is
-                                                            waiting for the host
-                                                            to review it.
-                                                        </p>
-                                                    </div>
-                                                )}
+                                        {application.status === 'REJECTED' && (
+                                            <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                                                <p className="text-red-700">
+                                                    Your application was not
+                                                    accepted for this workshop.
+                                                </p>
                                             </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
+                                        )}
+
+                                        {application.status === 'PENDING' && (
+                                            <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                                                <p className="text-yellow-700">
+                                                    Your application is waiting
+                                                    for the host to review it.
+                                                </p>
+                                            </div>
+                                        )}
+
+                                    </div>
+                                );
+                            })}
+
                         </div>
+
                     )}
 
                 </div>

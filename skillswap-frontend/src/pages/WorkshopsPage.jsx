@@ -89,6 +89,7 @@ function WorkshopsPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadWorkshops();
   }, [loadWorkshops]);
+
   const handleViewChange = (mode) => {
     setViewMode(mode);
     setError('');
@@ -212,20 +213,22 @@ function WorkshopsPage() {
 
           <button
             onClick={() => handleViewChange('all')}
-            className={`px-5 py-2 rounded-lg text-sm font-medium transition ${viewMode === 'all'
-              ? 'bg-blue-600 text-white'
-              : 'bg-white border border-gray-300 text-gray-600 hover:bg-blue-50'
-              }`}
+            className={`px-5 py-2 rounded-lg text-sm font-medium transition ${
+              viewMode === 'all'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white border border-gray-300 text-gray-600 hover:bg-blue-50'
+            }`}
           >
             Explore Workshops
           </button>
 
           <button
             onClick={() => handleViewChange('my')}
-            className={`px-5 py-2 rounded-lg text-sm font-medium transition ${viewMode === 'my'
-              ? 'bg-blue-600 text-white'
-              : 'bg-white border border-gray-300 text-gray-600 hover:bg-blue-50'
-              }`}
+            className={`px-5 py-2 rounded-lg text-sm font-medium transition ${
+              viewMode === 'my'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white border border-gray-300 text-gray-600 hover:bg-blue-50'
+            }`}
           >
             My Workshops
           </button>
@@ -372,6 +375,17 @@ function WorkshopsPage() {
                           Manage Applications
                         </button>
 
+                        <button
+                          onClick={() =>
+                            navigate(
+                              `/workshops/${workshop.id}/resources`
+                            )
+                          }
+                          className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+                        >
+                          Learning Resources
+                        </button>
+
                       </div>
 
                     ) : isOwnWorkshop ? (
@@ -392,6 +406,17 @@ function WorkshopsPage() {
                           className="w-full bg-yellow-500 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-yellow-600 transition"
                         >
                           Manage Applications
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            navigate(
+                              `/workshops/${workshop.id}/resources`
+                            )
+                          }
+                          className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+                        >
+                          Learning Resources
                         </button>
 
                       </div>

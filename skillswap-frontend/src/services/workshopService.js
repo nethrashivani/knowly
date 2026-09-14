@@ -14,6 +14,14 @@ export const getAllWorkshops = async () => {
   return response.data;
 };
 
+export const getWorkshopById = async (workshopId) => {
+  const response = await axios.get(
+    `${BASE_URL}/${workshopId}`
+  );
+
+  return response.data;
+};
+
 export const getMyWorkshops = async () => {
   const response = await axios.get(`${BASE_URL}/my`, authHeaders());
   return response.data;
@@ -38,6 +46,9 @@ export const applyForWorkshop = async (workshopId) => {
     {},
     authHeaders()
   );
+
+
+  
 
   return response.data;
 };
