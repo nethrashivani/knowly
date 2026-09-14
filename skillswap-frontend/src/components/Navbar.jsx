@@ -59,11 +59,10 @@ export default function Navbar() {
             {/* Home */}
             <button
               onClick={() => navigate('/')}
-              className={`text-sm font-medium transition ${
-                isActive('/')
+              className={`text-sm font-medium transition ${isActive('/')
                   ? 'text-blue-600'
                   : 'text-gray-600 hover:text-blue-600'
-              }`}
+                }`}
             >
               Home
             </button>
@@ -71,11 +70,10 @@ export default function Navbar() {
             {/* Skills */}
             <button
               onClick={() => navigate('/skills')}
-              className={`text-sm font-medium transition ${
-                isActive('/skills')
+              className={`text-sm font-medium transition ${isActive('/skills')
                   ? 'text-blue-600'
                   : 'text-gray-600 hover:text-blue-600'
-              }`}
+                }`}
             >
               Skills
             </button>
@@ -83,11 +81,10 @@ export default function Navbar() {
             {/* Workshops */}
             <button
               onClick={() => navigate('/workshops')}
-              className={`text-sm font-medium transition ${
-                location.pathname.startsWith('/workshops')
+              className={`text-sm font-medium transition ${location.pathname.startsWith('/workshops')
                   ? 'text-blue-600'
                   : 'text-gray-600 hover:text-blue-600'
-              }`}
+                }`}
             >
               Workshops
             </button>
@@ -95,15 +92,24 @@ export default function Navbar() {
             {/* My Interests */}
             <button
               onClick={() => navigate('/my-interests')}
-              className={`text-sm font-medium transition ${
-                isActive('/my-interests')
+              className={`text-sm font-medium transition ${isActive('/my-interests')
                   ? 'text-blue-600'
                   : 'text-gray-600 hover:text-blue-600'
-              }`}
+                }`}
             >
               My Interests
             </button>
 
+            {/* Workshop History */}
+            <button
+              onClick={() => navigate('/workshop-history')}
+              className={`text-sm font-medium transition ${isActive('/workshop-history')
+                  ? 'text-blue-600'
+                  : 'text-gray-600 hover:text-blue-600'
+                }`}
+            >
+              Workshop History
+            </button>
             {/* Notifications */}
             <NotificationBell />
 

@@ -22,6 +22,10 @@ import MyApplicationsPage from './pages/MyApplicationsPage';
 import ManageApplicationsPage from './pages/ManageApplicationsPage';
 import WorkshopResourcesPage from './pages/WorkshopResourcesPage';
 import { isLoggedIn } from './services/authService';
+import WorkshopHistoryPage from './pages/WorkshopHistoryPage';
+import RateWorkshopPage from './pages/RateWorkshopPage';
+
+
 
 function ProtectedRoute({ children }) {
   return isLoggedIn() ? children : <Navigate to="/login" />;
@@ -189,6 +193,16 @@ function App() {
         <Route
           path="/my-applications/:applicationId"
           element={<MyApplicationsPage />}
+        />
+
+        <Route
+          path="/workshop-history"
+          element={<WorkshopHistoryPage />}
+        />
+
+        <Route
+          path="/workshops/:workshopId/rate"
+          element={<RateWorkshopPage />}
         />
       </Routes>
     </BrowserRouter>

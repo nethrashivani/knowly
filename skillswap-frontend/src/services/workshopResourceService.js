@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { getToken } from './authService';
 
-const BASE_URL = 'http://localhost:8080/api/workshop-resources';
+const BASE_URL =
+  'http://localhost:8080/api/workshop-resources';
 
 const authHeaders = () => ({
   headers: {
@@ -24,8 +25,7 @@ export const uploadResource = async (
     formData,
     {
       headers: {
-        Authorization: `Bearer ${getToken()}`,
-        'Content-Type': 'multipart/form-data'
+        Authorization: `Bearer ${getToken()}`
       }
     }
   );

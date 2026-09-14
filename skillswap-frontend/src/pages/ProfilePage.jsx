@@ -49,9 +49,11 @@ function ProfilePage() {
           getMyApplications()
         ]);
 
-        const ratingsData =
-          await getRatingsForUser(profileData.userId);
+        const userId = profileData.userId ?? profileData.id;
 
+        const ratingsData = userId
+          ? await getRatingsForUser(userId)
+          : [];
         setProfile(profileData);
         setSkills(skillsData);
         setWorkshops(workshopsData);
