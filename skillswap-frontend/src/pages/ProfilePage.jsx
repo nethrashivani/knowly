@@ -266,7 +266,7 @@ function ProfilePage() {
             {/* Skills Offered */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
 
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
 
                 <h2 className="text-xl font-bold text-gray-900">
                   Skills I Offer
@@ -331,7 +331,7 @@ function ProfilePage() {
             {/* Workshops Hosted */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
 
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
 
                 <h2 className="text-xl font-bold text-gray-900">
                   Workshops I Host
@@ -418,7 +418,7 @@ function ProfilePage() {
             {/* Workshops Applied To */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
 
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
 
                 <h2 className="text-xl font-bold text-gray-900">
                   Workshops I've Applied To

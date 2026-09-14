@@ -137,7 +137,7 @@ export default function HomePage() {
         {/* Upcoming Workshops */}
         <section className="mt-10">
 
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
 
             <div>
               <h2 className="text-2xl font-bold text-gray-900">
