@@ -64,7 +64,7 @@ public class SecurityConfig {
                         // NOTIFICATIONS
                         .requestMatchers("/api/notifications/**").authenticated()
                         .requestMatchers("/api/skill-interests/**").authenticated()
-
+                        .requestMatchers("/api/test-email").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(
                         jwtAuthFilter,

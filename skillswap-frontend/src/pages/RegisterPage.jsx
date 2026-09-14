@@ -4,38 +4,53 @@ import { register, saveAuth } from '../services/authService';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+
   const [form, setForm] = useState({
     name: '',
     email: '',
-    password: '',
-    role: ''
+    password: ''
   });
+
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value
+    });
   };
 
   const validate = () => {
     if (!form.name.trim()) return 'Name is required';
     if (!form.email.trim()) return 'Email is required';
-    if (!form.password || form.password.length < 6) return 'Password must be at least 6 characters';
-    if (!form.role) return 'Please select a role';
+    if (!form.password || form.password.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+
     return null;
   };
 
   const handleSubmit = async () => {
     const validationError = validate();
-    if (validationError) return setError(validationError);
+
+    if (validationError) {
+      return setError(validationError);
+    }
+
     try {
       setLoading(true);
       setError('');
+
       const data = await register(form);
+
       saveAuth(data);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError(
+        err.response?.data?.message ||
+        'Registration failed. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -45,17 +60,29 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="bg-white rounded-xl shadow p-8 w-full max-w-md">
 
-        {/* Header */}
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-blue-600">SkillSwap</h1>
-          <p className="text-gray-500 mt-1">Create your account</p>
+          <h1 className="text-3xl font-bold text-blue-600">
+            SkillSwap
+          </h1>
+
+          <p className="text-gray-500 mt-1">
+            Create your account
+          </p>
         </div>
 
-        {error && <div className="bg-red-100 text-red-700 px-4 py-2 rounded mb-4">{error}</div>}
+        {error && (
+          <div className="bg-red-100 text-red-700 px-4 py-2 rounded mb-4">
+            {error}
+          </div>
+        )}
 
         <div className="flex flex-col gap-4">
+
           <div>
-            <label className="text-sm font-medium text-gray-700">Full Name</label>
+            <label className="text-sm font-medium text-gray-700">
+              Full Name
+            </label>
+
             <input
               name="name"
               value={form.name}
@@ -66,7 +93,10 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700">Email</label>
+            <label className="text-sm font-medium text-gray-700">
+              Email
+            </label>
+
             <input
               name="email"
               type="email"
@@ -78,7 +108,10 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700">Password</label>
+            <label className="text-sm font-medium text-gray-700">
+              Password
+            </label>
+
             <input
               name="password"
               type="password"
@@ -87,21 +120,6 @@ export default function RegisterPage() {
               placeholder="Min 6 characters"
               className="w-full mt-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-gray-700">I want to join as</label>
-            <select
-              name="role"
-              value={form.role}
-              onChange={handleChange}
-              className="w-full mt-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              <option value="">Select your role</option>
-              <option value="LEARNER">Learner — I want to learn skills</option>
-              <option value="TEACHER">Teacher — I want to teach skills</option>
-              <option value="BOTH">Both — I want to learn and teach</option>
-            </select>
           </div>
 
           <button
@@ -114,6 +132,7 @@ export default function RegisterPage() {
 
           <p className="text-center text-sm text-gray-500">
             Already have an account?{' '}
+
             <span
               onClick={() => navigate('/login')}
               className="text-blue-600 font-medium cursor-pointer hover:underline"
@@ -121,6 +140,7 @@ export default function RegisterPage() {
               Login here
             </span>
           </p>
+
         </div>
       </div>
     </div>

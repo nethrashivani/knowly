@@ -1,6 +1,5 @@
 package com.skillswap.skillswap_backend.dto;
 
-import com.skillswap.skillswap_backend.entity.User;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -19,7 +18,4 @@ public class RegisterRequest {
     @NotBlank(message = "Password is required")
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
-
-    @NotNull(message = "Role is required")
-    private User.Role role;
 }

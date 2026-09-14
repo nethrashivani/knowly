@@ -20,17 +20,20 @@ public class WorkshopApplicationService {
     private final WorkshopRepository workshopRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final EmailService emailService;
 
     public WorkshopApplicationService(
             WorkshopApplicationRepository applicationRepository,
             WorkshopRepository workshopRepository,
             UserRepository userRepository,
-            NotificationService notificationService) {
+            NotificationService notificationService,
+            EmailService emailService) {
 
         this.applicationRepository = applicationRepository;
         this.workshopRepository = workshopRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
+        this.emailService = emailService;
     }
 
     public WorkshopApplicationDTO applyForWorkshop(
@@ -146,10 +149,44 @@ public class WorkshopApplicationService {
             message = "Your application for the workshop \""
                     + workshop.getTitle()
                     + "\" has been accepted.";
+
+            // Send Gmail notification to the accepted learner
+            String emailSubject =
+                    "Your Knowly workshop application was accepted";
+
+            String emailBody =
+                    "Hi " + learner.getName() + ",\n\n"
+                    + "Good news! Your application for the workshop \""
+                    + workshop.getTitle()
+                    + "\" has been accepted.\n\n"
+                    + "Workshop details:\n"
+                    + "Workshop: " + workshop.getTitle() + "\n"
+                    + "Date & Time: " + workshop.getDateTime() + "\n"
+                    + "Location: " + workshop.getLocation() + "\n\n"
+                    + "You can now attend this workshop.\n\n"
+                    + "Regards,\n"
+                    + "Knowly";
+
+            try {
+                emailService.sendEmail(
+                        learner.getEmail(),
+                        emailSubject,
+                        emailBody
+                );
+            } catch (Exception e) {
+                // Email failure should not undo the application decision
+                System.err.println(
+                        "Failed to send acceptance email to "
+                                + learner.getEmail()
+                                + ": " + e.getMessage()
+                );
+            }
+
         } else if (status == ApplicationStatus.REJECTED) {
             message = "Your application for the workshop \""
                     + workshop.getTitle()
                     + "\" has been rejected.";
+
         } else {
             message = "Your application for the workshop \""
                     + workshop.getTitle()
@@ -165,24 +202,24 @@ public class WorkshopApplicationService {
     }
 
     private WorkshopApplicationDTO convertToDTO(
-        WorkshopApplication application) {
+            WorkshopApplication application) {
 
-    Workshop workshop = application.getWorkshop();
-    User learner = application.getLearner();
+        Workshop workshop = application.getWorkshop();
+        User learner = application.getLearner();
 
-    return WorkshopApplicationDTO.builder()
-            .id(application.getId())
-            .workshopId(workshop.getId())
-            .workshopTitle(workshop.getTitle())
-            .teacherName(workshop.getTeacher().getName())
-            .teacherEmail(workshop.getTeacher().getEmail())
-            .workshopDateTime(workshop.getDateTime())
-            .location(workshop.getLocation())
-            .learnerId(learner.getId())
-            .learnerName(learner.getName())
-            .learnerEmail(learner.getEmail())
-            .status(application.getStatus())
-            .appliedAt(application.getAppliedAt())
-            .build();
-}
+        return WorkshopApplicationDTO.builder()
+                .id(application.getId())
+                .workshopId(workshop.getId())
+                .workshopTitle(workshop.getTitle())
+                .teacherName(workshop.getTeacher().getName())
+                .teacherEmail(workshop.getTeacher().getEmail())
+                .workshopDateTime(workshop.getDateTime())
+                .location(workshop.getLocation())
+                .learnerId(learner.getId())
+                .learnerName(learner.getName())
+                .learnerEmail(learner.getEmail())
+                .status(application.getStatus())
+                .appliedAt(application.getAppliedAt())
+                .build();
+    }
 }
