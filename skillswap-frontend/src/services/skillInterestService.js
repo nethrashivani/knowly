@@ -50,3 +50,12 @@ export const isInterested = async (skillId) => {
 
   return response.data;
 };
+
+export const getMyInterests = async () => {
+  const response = await axios.get(
+    `${BASE_URL}/my`,
+    authHeaders()
+  );
+
+  return response.data;
+};

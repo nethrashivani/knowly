@@ -17,4 +17,9 @@ public interface WorkshopApplicationRepository
             Long workshopId,
             String email
     );
+
+    Optional<WorkshopApplication> findByWorkshop_IdAndLearner_Id(
+            Long workshopId,
+            Long learnerId
+    );
 }

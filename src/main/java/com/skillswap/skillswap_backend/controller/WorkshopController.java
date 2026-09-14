@@ -2,6 +2,7 @@ package com.skillswap.skillswap_backend.controller;
 
 import com.skillswap.skillswap_backend.dto.WorkshopDTO;
 import com.skillswap.skillswap_backend.service.WorkshopService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/workshops")
+@SecurityRequirement(name = "bearerAuth")
 public class WorkshopController {
 
     private final WorkshopService workshopService;

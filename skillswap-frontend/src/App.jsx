@@ -11,6 +11,7 @@ import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import PublicProfilePage from './pages/PublicProfilePage';
 import MySkillsPage from './pages/MySkillsPage';
+import MyInterestsPage from './pages/MyInterestsPage';
 
 import SkillsPage from './pages/SkillsPage';
 
@@ -102,11 +103,22 @@ function App() {
           }
         />
 
+        {/* My Skills */}
         <Route
           path="/my-skills"
           element={
             <ProtectedRoute>
               <MySkillsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* My Interests */}
+        <Route
+          path="/my-interests"
+          element={
+            <ProtectedRoute>
+              <MyInterestsPage />
             </ProtectedRoute>
           }
         />
@@ -139,6 +151,7 @@ function App() {
           }
         />
 
+        {/* My Workshops */}
         <Route
           path="/my-workshops"
           element={
@@ -148,6 +161,7 @@ function App() {
           }
         />
 
+        {/* My Workshop Applications */}
         <Route
           path="/my-applications"
           element={
@@ -157,6 +171,7 @@ function App() {
           }
         />
 
+        {/* Manage Workshop Applications */}
         <Route
           path="/workshops/:workshopId/applications"
           element={

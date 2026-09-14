@@ -15,6 +15,10 @@ public class WorkshopApplicationDTO {
 
     private Long workshopId;
     private String workshopTitle;
+    private String teacherName;
+    private String teacherEmail;
+    private LocalDateTime workshopDateTime;
+    private String location;
 
     private Long learnerId;
     private String learnerName;

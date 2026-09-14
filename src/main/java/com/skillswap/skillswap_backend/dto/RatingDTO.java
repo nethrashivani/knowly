@@ -16,6 +16,8 @@ public class RatingDTO {
 
     private Long ratedUserId;
 
+    private Long workshopId;
+
     private String reviewerName;
 
     private String reviewerEmail;

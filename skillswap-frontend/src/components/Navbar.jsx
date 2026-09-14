@@ -56,6 +56,7 @@ export default function Navbar() {
           {/* Navigation */}
           <div className="flex items-center gap-5">
 
+            {/* Home */}
             <button
               onClick={() => navigate('/')}
               className={`text-sm font-medium transition ${
@@ -67,6 +68,7 @@ export default function Navbar() {
               Home
             </button>
 
+            {/* Skills */}
             <button
               onClick={() => navigate('/skills')}
               className={`text-sm font-medium transition ${
@@ -78,6 +80,7 @@ export default function Navbar() {
               Skills
             </button>
 
+            {/* Workshops */}
             <button
               onClick={() => navigate('/workshops')}
               className={`text-sm font-medium transition ${
@@ -89,6 +92,19 @@ export default function Navbar() {
               Workshops
             </button>
 
+            {/* My Interests */}
+            <button
+              onClick={() => navigate('/my-interests')}
+              className={`text-sm font-medium transition ${
+                isActive('/my-interests')
+                  ? 'text-blue-600'
+                  : 'text-gray-600 hover:text-blue-600'
+              }`}
+            >
+              My Interests
+            </button>
+
+            {/* Notifications */}
             <NotificationBell />
 
             {/* User Dropdown */}
@@ -124,6 +140,7 @@ export default function Navbar() {
                     </p>
                   </div>
 
+                  {/* Profile */}
                   <button
                     onClick={() => goTo('/profile')}
                     className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition"
@@ -131,6 +148,7 @@ export default function Navbar() {
                     Profile
                   </button>
 
+                  {/* Logout */}
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition"

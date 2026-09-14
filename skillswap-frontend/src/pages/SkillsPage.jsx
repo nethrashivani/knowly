@@ -201,8 +201,8 @@ export default function SkillsPage() {
           category === 'All'
             ? data
             : data.filter(
-                (skill) => skill.category === category
-              );
+              (skill) => skill.category === category
+            );
 
         setSkills(filtered);
         await loadInterestData(filtered);
@@ -339,7 +339,21 @@ export default function SkillsPage() {
       <Navbar />
 
       <main className="max-w-6xl mx-auto px-4 py-10">
-
+        {/* Back */}
+        <button
+          onClick={() => {
+            if (viewMode === 'my') {
+              setViewMode('all');
+            } else {
+              navigate('/');
+            }
+          }}
+          className="text-sm text-gray-500 hover:text-blue-600 mb-6 transition"
+        >
+          {viewMode === 'my'
+            ? '← Back to Skills'
+            : '← Back to Home'}
+        </button>
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
 
@@ -371,22 +385,20 @@ export default function SkillsPage() {
 
           <button
             onClick={() => handleViewChange('all')}
-            className={`px-5 py-2 rounded-lg text-sm font-medium transition ${
-              viewMode === 'all'
+            className={`px-5 py-2 rounded-lg text-sm font-medium transition ${viewMode === 'all'
                 ? 'bg-blue-600 text-white'
                 : 'bg-white border border-gray-300 text-gray-600 hover:bg-blue-50'
-            }`}
+              }`}
           >
             Explore Skills
           </button>
 
           <button
             onClick={() => handleViewChange('my')}
-            className={`px-5 py-2 rounded-lg text-sm font-medium transition ${
-              viewMode === 'my'
+            className={`px-5 py-2 rounded-lg text-sm font-medium transition ${viewMode === 'my'
                 ? 'bg-blue-600 text-white'
                 : 'bg-white border border-gray-300 text-gray-600 hover:bg-blue-50'
-            }`}
+              }`}
           >
             My Skills
           </button>
@@ -447,11 +459,10 @@ export default function SkillsPage() {
               onClick={() =>
                 handleCategoryFilter(category)
               }
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
-                selectedCategory === category
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${selectedCategory === category
                   ? 'bg-blue-600 text-white'
                   : 'bg-white border border-gray-300 text-gray-600 hover:bg-blue-50'
-              }`}
+                }`}
             >
               {category}
             </button>
@@ -578,11 +589,10 @@ export default function SkillsPage() {
                         disabled={
                           interestLoading[skill.id]
                         }
-                        className={`flex-1 min-w-[120px] text-sm py-2 rounded-lg transition ${
-                          interestedSkills[skill.id]
+                        className={`flex-1 min-w-[120px] text-sm py-2 rounded-lg transition ${interestedSkills[skill.id]
                             ? 'bg-green-50 text-green-600 hover:bg-green-100'
                             : 'bg-blue-600 text-white hover:bg-blue-700'
-                        }`}
+                          }`}
                       >
                         {interestLoading[skill.id]
                           ? 'Updating...'

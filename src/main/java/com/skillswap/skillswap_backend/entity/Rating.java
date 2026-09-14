@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
         name = "ratings",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        name = "uk_reviewer_rated_user",
-                        columnNames = {"reviewer_id", "rated_user_id"}
+                        name = "uk_reviewer_workshop",
+                        columnNames = {"reviewer_id", "workshop_id"}
                 )
         }
 )
@@ -34,6 +34,10 @@ public class Rating {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "rated_user_id", nullable = false)
     private User ratedUser;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "workshop_id", nullable = false)
+    private Workshop workshop;
 
     @Min(value = 1, message = "Rating must be at least 1")
     @Max(value = 5, message = "Rating cannot be more than 5")

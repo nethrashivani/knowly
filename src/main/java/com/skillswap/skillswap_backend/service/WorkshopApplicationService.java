@@ -165,20 +165,24 @@ public class WorkshopApplicationService {
     }
 
     private WorkshopApplicationDTO convertToDTO(
-            WorkshopApplication application) {
+        WorkshopApplication application) {
 
-        Workshop workshop = application.getWorkshop();
-        User learner = application.getLearner();
+    Workshop workshop = application.getWorkshop();
+    User learner = application.getLearner();
 
-        return WorkshopApplicationDTO.builder()
-                .id(application.getId())
-                .workshopId(workshop.getId())
-                .workshopTitle(workshop.getTitle())
-                .learnerId(learner.getId())
-                .learnerName(learner.getName())
-                .learnerEmail(learner.getEmail())
-                .status(application.getStatus())
-                .appliedAt(application.getAppliedAt())
-                .build();
-    }
+    return WorkshopApplicationDTO.builder()
+            .id(application.getId())
+            .workshopId(workshop.getId())
+            .workshopTitle(workshop.getTitle())
+            .teacherName(workshop.getTeacher().getName())
+            .teacherEmail(workshop.getTeacher().getEmail())
+            .workshopDateTime(workshop.getDateTime())
+            .location(workshop.getLocation())
+            .learnerId(learner.getId())
+            .learnerName(learner.getName())
+            .learnerEmail(learner.getEmail())
+            .status(application.getStatus())
+            .appliedAt(application.getAppliedAt())
+            .build();
+}
 }

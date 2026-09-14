@@ -1,12 +1,18 @@
 package com.skillswap.skillswap_backend.service;
 
 import com.skillswap.skillswap_backend.dto.RatingDTO;
+import com.skillswap.skillswap_backend.entity.ApplicationStatus;
 import com.skillswap.skillswap_backend.entity.Rating;
 import com.skillswap.skillswap_backend.entity.User;
+import com.skillswap.skillswap_backend.entity.Workshop;
+import com.skillswap.skillswap_backend.entity.WorkshopApplication;
 import com.skillswap.skillswap_backend.repository.RatingRepository;
 import com.skillswap.skillswap_backend.repository.UserRepository;
+import com.skillswap.skillswap_backend.repository.WorkshopApplicationRepository;
+import com.skillswap.skillswap_backend.repository.WorkshopRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -14,12 +20,19 @@ public class RatingService {
 
     private final RatingRepository ratingRepository;
     private final UserRepository userRepository;
+    private final WorkshopRepository workshopRepository;
+    private final WorkshopApplicationRepository workshopApplicationRepository;
 
     public RatingService(
             RatingRepository ratingRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            WorkshopRepository workshopRepository,
+            WorkshopApplicationRepository workshopApplicationRepository) {
+
         this.ratingRepository = ratingRepository;
         this.userRepository = userRepository;
+        this.workshopRepository = workshopRepository;
+        this.workshopApplicationRepository = workshopApplicationRepository;
     }
 
     public RatingDTO createRating(String reviewerEmail, RatingDTO dto) {
@@ -27,21 +40,50 @@ public class RatingService {
         User reviewer = userRepository.findByEmail(reviewerEmail)
                 .orElseThrow(() -> new RuntimeException("Reviewer not found"));
 
-        User ratedUser = userRepository.findById(dto.getRatedUserId())
-                .orElseThrow(() -> new RuntimeException("Rated user not found"));
+        Workshop workshop = workshopRepository.findById(dto.getWorkshopId())
+                .orElseThrow(() -> new RuntimeException("Workshop not found"));
+
+        User ratedUser = workshop.getTeacher();
 
         if (reviewer.getId().equals(ratedUser.getId())) {
-            throw new RuntimeException("You cannot rate yourself");
+            throw new RuntimeException("You cannot rate your own workshop");
         }
 
-        if (ratingRepository.existsByReviewer_IdAndRatedUser_Id(
-                reviewer.getId(), ratedUser.getId())) {
-            throw new RuntimeException("You have already rated this user");
+        if (!workshop.getDateTime().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException(
+                    "You can only rate a workshop after it has happened"
+            );
+        }
+
+        WorkshopApplication application =
+                workshopApplicationRepository
+                        .findByWorkshop_IdAndLearner_Id(
+                                workshop.getId(),
+                                reviewer.getId()
+                        )
+                        .orElseThrow(() -> new RuntimeException(
+                                "You have not applied for this workshop"
+                        ));
+
+        if (application.getStatus() != ApplicationStatus.ACCEPTED) {
+            throw new RuntimeException(
+                    "Only accepted learners can rate a workshop"
+            );
+        }
+
+        if (ratingRepository.existsByReviewer_IdAndWorkshop_Id(
+                reviewer.getId(),
+                workshop.getId()
+        )) {
+            throw new RuntimeException(
+                    "You have already rated this workshop"
+            );
         }
 
         Rating rating = Rating.builder()
                 .reviewer(reviewer)
                 .ratedUser(ratedUser)
+                .workshop(workshop)
                 .rating(dto.getRating())
                 .review(dto.getReview())
                 .build();
@@ -68,6 +110,7 @@ public class RatingService {
         return RatingDTO.builder()
                 .id(rating.getId())
                 .ratedUserId(rating.getRatedUser().getId())
+                .workshopId(rating.getWorkshop().getId())
                 .reviewerName(reviewer.getName())
                 .reviewerEmail(reviewer.getEmail())
                 .rating(rating.getRating())
