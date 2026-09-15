@@ -24,29 +24,25 @@ public class AuthService {
     private final OtpService otpService;
 
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
+    public void register(RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already registered");
         }
 
-        User user = User.builder()
+        // Keep the account pending until the email OTP is verified.
+        pendingRegistrationRepository.findByEmail(request.getEmail())
+                .ifPresent(pendingRegistration ->
+                        pendingRegistrationRepository.delete(pendingRegistration));
+
+        PendingRegistration pendingRegistration = PendingRegistration.builder()
                 .name(request.getName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(User.Role.BOTH)
                 .build();
 
-        userRepository.save(user);
-
-        String token = jwtUtil.generateToken(user.getEmail());
-
-        return AuthResponse.builder()
-                .token(token)
-                .name(user.getName())
-                .email(user.getEmail())
-                .role(user.getRole())
-                .build();
+        pendingRegistrationRepository.save(pendingRegistration);
+        otpService.generateAndSendOtp(request.getEmail());
     }
 
     @Transactional
@@ -90,6 +86,19 @@ public class AuthService {
                 .email(user.getEmail())
                 .role(user.getRole())
                 .build();
+    }
+
+    @Transactional
+    public void resendRegistrationOtp(String email) {
+        if (userRepository.existsByEmail(email)) {
+            throw new RuntimeException("Email already registered");
+        }
+
+        if (pendingRegistrationRepository.findByEmail(email).isEmpty()) {
+            throw new RuntimeException("Registration request not found. Please register first.");
+        }
+
+        otpService.generateAndSendOtp(email);
     }
 
     public AuthResponse login(LoginRequest request) {
