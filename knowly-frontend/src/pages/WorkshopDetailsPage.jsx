@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getWorkshopById, applyForWorkshop } from '../services/workshopService';
 import { getMyApplications } from '../services/workshopApplicationService';
@@ -7,8 +7,10 @@ import { getUser } from '../services/authService';
 
 export default function WorkshopDetailsPage() {
   const { workshopId } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const user = getUser();
+  const fromRoom = searchParams.get('fromRoom') === 'true';
   const [workshop, setWorkshop] = useState(null);
   const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -56,12 +58,13 @@ export default function WorkshopDetailsPage() {
     hour: 'numeric', minute: '2-digit'
   });
   const isOwn = user?.email === workshop?.teacherEmail;
+  const goBack = () => navigate(fromRoom ? '/room' : '/workshops');
 
   if (loading) return <><Navbar /><div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-500">Loading workshop...</div></>;
-  if (!workshop) return <><Navbar /><main className="min-h-screen bg-gray-50 max-w-4xl mx-auto px-4 py-10"><button onClick={() => navigate('/workshops')} className="text-blue-600 mb-6">← Back to Workshops</button><div className="bg-white rounded-2xl p-8 text-center text-red-600">{error || 'Workshop not found.'}</div></main></>;
+  if (!workshop) return <><Navbar /><main className="min-h-screen bg-gray-50 max-w-4xl mx-auto px-4 py-10"><button onClick={goBack} className="text-blue-600 mb-6">← {fromRoom ? 'Back to Room' : 'Back to Workshops'}</button><div className="bg-white rounded-2xl p-8 text-center text-red-600">{error || 'Workshop not found.'}</div></main></>;
 
   return <div className="min-h-screen bg-gray-50"><Navbar /><main className="max-w-4xl mx-auto px-4 py-10">
-    <button onClick={() => navigate('/workshops')} className="text-sm text-gray-500 hover:text-blue-600 mb-6">← Back to Room Workshops</button>
+    <button onClick={goBack} className="text-sm text-gray-500 hover:text-blue-600 mb-6">← {fromRoom ? `Back to ${workshop.roomName || 'Room'}` : 'Back to Workshops'}</button>
     {error && <div className="bg-red-100 text-red-700 px-4 py-3 rounded-xl mb-5">{error}</div>}
     {message && <div className="bg-green-100 text-green-700 px-4 py-3 rounded-xl mb-5">{message}</div>}
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
