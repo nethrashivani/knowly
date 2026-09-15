@@ -4,10 +4,10 @@ import { createWorkshop } from '../services/workshopService';
 
 export default function CreateWorkshopPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const returnTo = location.state?.returnTo || '/workshops';
+  const routeLocation = useLocation();
+  const returnTo = routeLocation.state?.returnTo || '/workshops';
   const isSkillFlow = returnTo.startsWith('/skills/');
-  const [formData, setFormData] = useState({ title: '', description: '', date: '', hour: '', minute: '', period: 'AM', location: 'Offline', meetingUrl: '', capacity: 10 });
+  const [formData, setFormData] = useState({ title: '', description: '', date: '', hour: '', minute: '', period: 'AM', mode: 'Offline', offlineLocation: '', meetingUrl: '', capacity: 10 });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -30,11 +30,19 @@ export default function CreateWorkshopPage() {
     e.preventDefault();
     if (!formData.date) return setError('Please select a workshop date.');
     const timeError = validateTime(); if (timeError) return setError(timeError);
-    if (formData.location === 'Online' && !formData.meetingUrl.trim()) return setError('Please enter a Google Meet or Zoom URL for an online workshop.');
+    if (formData.mode === 'Offline' && !formData.offlineLocation.trim()) return setError('Please enter the workshop location.');
+    if (formData.mode === 'Online' && !formData.meetingUrl.trim()) return setError('Please enter a Google Meet or Zoom URL for an online workshop.');
     if (formData.meetingUrl.trim() && !/^https?:\/\//i.test(formData.meetingUrl.trim())) return setError('Meeting URL must start with http:// or https://');
     try {
       setSaving(true); setError('');
-      await createWorkshop({ title: formData.title, description: formData.description, dateTime: `${formData.date}T${convertTo24Hour()}`, location: formData.location, meetingUrl: formData.location === 'Online' ? formData.meetingUrl.trim() : null, capacity: Number(formData.capacity) });
+      await createWorkshop({
+        title: formData.title,
+        description: formData.description,
+        dateTime: `${formData.date}T${convertTo24Hour()}`,
+        location: formData.mode === 'Online' ? 'Online' : formData.offlineLocation.trim(),
+        meetingUrl: formData.mode === 'Online' ? formData.meetingUrl.trim() : null,
+        capacity: Number(formData.capacity)
+      });
       navigate(returnTo);
     } catch (err) {
       console.error(err); setError(err.response?.data?.message || 'Failed to create workshop.');
@@ -52,8 +60,9 @@ export default function CreateWorkshopPage() {
           <div><label className="block font-medium mb-1">Description</label><textarea name="description" value={formData.description} onChange={handleChange} rows="4" className="w-full border border-gray-300 rounded-lg px-4 py-2" placeholder="Describe what participants will learn..." /></div>
           <div><label className="block font-medium mb-1">Date</label><input type="date" name="date" value={formData.date} onChange={handleChange} required className="w-full border border-gray-300 rounded-lg px-4 py-2" /></div>
           <div><label className="block font-medium mb-1">Time</label><div className="flex flex-wrap items-center gap-2"><input type="text" name="hour" value={formData.hour} onChange={(e) => setFormData((prev) => ({ ...prev, hour: e.target.value.replace(/\D/g, '').slice(0, 2) }))} placeholder="HH" inputMode="numeric" maxLength="2" required className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-center" /><span className="text-xl font-semibold text-gray-500">:</span><input type="text" name="minute" value={formData.minute} onChange={(e) => setFormData((prev) => ({ ...prev, minute: e.target.value.replace(/\D/g, '').slice(0, 2) }))} placeholder="MM" inputMode="numeric" maxLength="2" required className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-center" /><select name="period" value={formData.period} onChange={handleChange} className="border border-gray-300 rounded-lg px-3 py-2"><option value="AM">AM</option><option value="PM">PM</option></select></div><p className="text-xs text-gray-500 mt-1">Enter hour from 1–12 and minutes from 00–59.</p></div>
-          <div><label className="block font-medium mb-1">Location</label><select name="location" value={formData.location} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-2"><option value="Offline">Offline</option><option value="Online">Online</option></select></div>
-          {formData.location === 'Online' && <div><label className="block font-medium mb-1">Meeting URL</label><input type="url" name="meetingUrl" value={formData.meetingUrl} onChange={handleChange} required className="w-full border border-gray-300 rounded-lg px-4 py-2" placeholder="https://meet.google.com/... or https://zoom.us/..." /><p className="text-xs text-gray-500 mt-1">Paste the Google Meet or Zoom link participants should use.</p></div>}
+          <div><label className="block font-medium mb-1">Workshop Type</label><select name="mode" value={formData.mode} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-2"><option value="Offline">Offline</option><option value="Online">Online</option></select></div>
+          {formData.mode === 'Offline' && <div><label className="block font-medium mb-1">Location</label><input type="text" name="offlineLocation" value={formData.offlineLocation} onChange={handleChange} required className="w-full border border-gray-300 rounded-lg px-4 py-2" placeholder="e.g. Capgemini Chennai Office" /></div>}
+          {formData.mode === 'Online' && <div><label className="block font-medium mb-1">Meeting URL</label><input type="url" name="meetingUrl" value={formData.meetingUrl} onChange={handleChange} required className="w-full border border-gray-300 rounded-lg px-4 py-2" placeholder="https://meet.google.com/... or https://zoom.us/..." /><p className="text-xs text-gray-500 mt-1">Paste the Google Meet or Zoom link participants should use.</p></div>}
           <div><label className="block font-medium mb-1">Capacity</label><input type="number" name="capacity" value={formData.capacity} onChange={handleChange} min="1" required className="w-full border border-gray-300 rounded-lg px-4 py-2" /></div>
           <button type="submit" disabled={saving} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50">{saving ? 'Creating...' : 'Create Workshop'}</button>
         </form>
