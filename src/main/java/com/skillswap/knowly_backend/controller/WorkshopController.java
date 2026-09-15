@@ -26,6 +26,11 @@ public class WorkshopController {
         return ResponseEntity.ok(workshopService.getAllWorkshops(authentication.getName()));
     }
 
+    @GetMapping("/room/{roomId}")
+    public ResponseEntity<List<WorkshopDTO>> getRoomWorkshops(@PathVariable Long roomId, Authentication authentication) {
+        return ResponseEntity.ok(workshopService.getRoomWorkshops(roomId, authentication.getName()));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<WorkshopDTO> getWorkshopById(@PathVariable Long id, Authentication authentication) {
         return ResponseEntity.ok(workshopService.getWorkshopById(id, authentication.getName()));

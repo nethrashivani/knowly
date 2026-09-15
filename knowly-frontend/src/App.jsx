@@ -10,7 +10,7 @@ import ProfilePage from './pages/ProfilePage';
 import PublicProfilePage from './pages/PublicProfilePage';
 import MySkillsPage from './pages/MySkillsPage';
 import MyInterestsPage from './pages/MyInterestsPage';
-import SkillsExplorePage from './pages/SkillsExplorePage';
+import SkillsPage from './pages/SkillsPage';
 import WorkshopsPage from './pages/WorkshopsPage';
 import WorkshopDetailsPage from './pages/WorkshopDetailsPage';
 import CreateWorkshopPage from './pages/CreateWorkshopPage';
@@ -21,8 +21,8 @@ import WorkshopResourcesPage from './pages/WorkshopResourcesPage';
 import { isLoggedIn } from './services/authService';
 import WorkshopHistoryPage from './pages/WorkshopHistoryPage';
 import RateWorkshopPage from './pages/RateWorkshopPage';
-import RoomPage from './pages/RoomPage';
 import MyRoomsPage from './pages/MyRoomsPage';
+import RoomWorkshopsPage from './pages/RoomWorkshopsPage';
 
 function ProtectedRoute({ children }) { return isLoggedIn() ? children : <Navigate to="/login" />; }
 
@@ -32,7 +32,7 @@ function App() {
     <Route path="/register" element={<RegisterPage />} />
     <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
     <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-    <Route path="/skills" element={<ProtectedRoute><SkillsExplorePage /></ProtectedRoute>} />
+    <Route path="/skills" element={<ProtectedRoute><SkillsPage /></ProtectedRoute>} />
     <Route path="/skills/:id" element={<ProtectedRoute><SkillDetailsPage /></ProtectedRoute>} />
     <Route path="/skills/:id/demand" element={<ProtectedRoute><SkillDemandPage /></ProtectedRoute>} />
     <Route path="/add" element={<ProtectedRoute><AddSkillPage /></ProtectedRoute>} />
@@ -51,7 +51,7 @@ function App() {
     <Route path="/workshop-history" element={<WorkshopHistoryPage />} />
     <Route path="/workshops/:workshopId/rate" element={<RateWorkshopPage />} />
     <Route path="/my-rooms" element={<ProtectedRoute><MyRoomsPage /></ProtectedRoute>} />
-    <Route path="/room" element={<ProtectedRoute><RoomPage /></ProtectedRoute>} />
+    <Route path="/room" element={<ProtectedRoute><RoomWorkshopsPage /></ProtectedRoute>} />
   </Routes></BrowserRouter>;
 }
 

@@ -9,4 +9,5 @@ public interface WorkshopRepository extends JpaRepository<Workshop, Long> {
     List<Workshop> findByTeacher_Email(String email);
     List<Workshop> findByTeacher_Id(Long teacherId);
     List<Workshop> findByRoom_Id(Long roomId);
+    List<Workshop> findByRoomIsNull();
 }
