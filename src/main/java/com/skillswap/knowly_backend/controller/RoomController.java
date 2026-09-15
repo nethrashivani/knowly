@@ -46,4 +46,10 @@ public class RoomController {
         roomService.leaveRoom(authentication.getName(), roomId);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/{roomId}")
+    public ResponseEntity<Void> deleteRoom(Authentication authentication, @PathVariable Long roomId) {
+        roomService.deleteRoom(authentication.getName(), roomId);
+        return ResponseEntity.noContent().build();
+    }
 }
