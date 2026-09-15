@@ -22,6 +22,7 @@ import { isLoggedIn } from './services/authService';
 import WorkshopHistoryPage from './pages/WorkshopHistoryPage';
 import RateWorkshopPage from './pages/RateWorkshopPage';
 import RoomPage from './pages/RoomPage';
+import MyRoomsPage from './pages/MyRoomsPage';
 
 function ProtectedRoute({ children }) {
   return isLoggedIn() ? children : <Navigate to="/login" />;
@@ -53,6 +54,7 @@ function App() {
         <Route path="/my-applications/:applicationId" element={<MyApplicationsPage />} />
         <Route path="/workshop-history" element={<WorkshopHistoryPage />} />
         <Route path="/workshops/:workshopId/rate" element={<RateWorkshopPage />} />
+        <Route path="/my-rooms" element={<ProtectedRoute><MyRoomsPage /></ProtectedRoute>} />
         <Route path="/room" element={<ProtectedRoute><RoomPage /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
