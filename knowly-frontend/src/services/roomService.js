@@ -4,9 +4,9 @@ import { getToken } from './authService';
 const BASE_URL = 'https://knowly-lphd.onrender.com/api/rooms';
 const authHeaders = () => ({ headers: { Authorization: `Bearer ${getToken()}` } });
 
-export const getMyRoom = async () => {
+export const getMyRooms = async () => {
   const response = await axios.get(`${BASE_URL}/my`, authHeaders());
-  return response.status === 204 ? null : response.data;
+  return response.data;
 };
 
 export const createRoom = async (name) => {
@@ -19,6 +19,11 @@ export const joinRoom = async (code) => {
   return response.data;
 };
 
-export const leaveRoom = async () => {
-  await axios.delete(`${BASE_URL}/my`, authHeaders());
+export const switchRoom = async (roomId) => {
+  const response = await axios.put(`${BASE_URL}/${roomId}/active`, {}, authHeaders());
+  return response.data;
+};
+
+export const leaveRoom = async (roomId) => {
+  await axios.delete(`${BASE_URL}/${roomId}/memberships`, authHeaders());
 };
