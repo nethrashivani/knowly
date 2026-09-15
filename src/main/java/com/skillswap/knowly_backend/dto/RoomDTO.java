@@ -13,4 +13,5 @@ public class RoomDTO {
     private Long ownerId;
     private String ownerName;
     private boolean owner;
+    private boolean active;
 }
