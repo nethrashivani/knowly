@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getToken } from './authService';
 
-const BASE_URL = 'http://https://knowly-lphd.onrender.com/api/profile';
+const BASE_URL = 'https://knowly-lphd.onrender.com/api/profile';
 
 const authHeaders = () => ({
   headers: {
