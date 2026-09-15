@@ -29,15 +29,11 @@ public class AuthController {
     private final OtpService otpService;
 
     @PostMapping("/register")
-    @Operation(summary = "Start registration and send OTP")
-    public ResponseEntity<?> register(
+    @Operation(summary = "Register user and log in")
+    public ResponseEntity<AuthResponse> register(
             @Valid @RequestBody RegisterRequest request) {
 
-        authService.register(request);
-
-        return ResponseEntity.ok(
-                "OTP sent successfully. Please verify your email."
-        );
+        return ResponseEntity.ok(authService.register(request));
     }
 
     @PostMapping("/login")
