@@ -27,3 +27,7 @@ export const switchRoom = async (roomId) => {
 export const leaveRoom = async (roomId) => {
   await axios.delete(`${BASE_URL}/${roomId}/memberships`, authHeaders());
 };
+
+export const deleteRoom = async (roomId) => {
+  await axios.delete(`${BASE_URL}/${roomId}`, authHeaders());
+};
