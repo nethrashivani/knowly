@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fixed navbar: keep page content below the 64px navigation bar. */
+body {
+  padding-top: 64px;
+}
+
 /* Keep room invitation codes compact without changing other text. */
 .text-2xl.font-mono.tracking-widest.text-blue-800 {
   font-size: 1.125rem;
