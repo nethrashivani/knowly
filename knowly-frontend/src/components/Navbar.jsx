@@ -33,7 +33,7 @@ export default function Navbar() {
   const goTo = (path) => { setOpen(false); setMobileMenuOpen(false); navigate(path); };
 
   return (
-    <nav className="bg-white border-b border-gray-200 relative z-40">
+    <nav className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
       <div className="max-w-6xl mx-auto px-4">
         <div className="h-16 flex items-center justify-between gap-3">
           <button type="button" onClick={() => goTo('/')} className="text-2xl font-bold text-blue-600 shrink-0">Knowly</button>
