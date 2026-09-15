@@ -37,6 +37,7 @@ public class WorkshopService {
                 .location(dto.getLocation())
                 .meetingUrl(dto.getMeetingUrl())
                 .capacity(dto.getCapacity())
+                .requiresAcceptance(dto.isRequiresAcceptance())
                 .room(activeRoom)
                 .teacher(teacher)
                 .build();
@@ -95,6 +96,7 @@ public class WorkshopService {
                 .location(workshop.getLocation())
                 .meetingUrl(workshop.getMeetingUrl())
                 .capacity(workshop.getCapacity())
+                .requiresAcceptance(workshop.isRequiresAcceptance())
                 .teacherId(workshop.getTeacher().getId())
                 .teacherName(workshop.getTeacher().getName())
                 .teacherEmail(workshop.getTeacher().getEmail())
