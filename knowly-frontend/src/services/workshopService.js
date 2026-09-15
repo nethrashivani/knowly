@@ -19,6 +19,11 @@ export const getMyWorkshops = async () => {
   return response.data;
 };
 
+export const getWorkshopsByTeacher = async (teacherId) => {
+  const response = await axios.get(`${BASE_URL}/teacher/${teacherId}`);
+  return response.data;
+};
+
 export const createWorkshop = async (workshopData) => {
   const response = await axios.post(BASE_URL, workshopData, authHeaders());
   return response.data;
