@@ -13,6 +13,7 @@ export default function ManageApplicationsPage() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [updatingId, setUpdatingId] = useState(null);
 
   const authHeaders = {
     headers: {
@@ -45,6 +46,13 @@ export default function ManageApplicationsPage() {
   }, [workshopId]);
 
   const updateStatus = async (applicationId, status) => {
+    if (updatingId === applicationId) {
+      return;
+    }
+
+    setUpdatingId(applicationId);
+    setError('');
+
     try {
       const response = await axios.put(
         `${BASE_URL}/${applicationId}/status?status=${status}`,
@@ -62,6 +70,8 @@ export default function ManageApplicationsPage() {
     } catch (err) {
       console.error(err);
       setError('Failed to update application status.');
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -81,14 +91,10 @@ export default function ManageApplicationsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-
       <Navbar />
 
       <main className="max-w-5xl mx-auto px-4 py-10">
-
-        {/* Navigation */}
         <div className="flex flex-wrap items-center gap-3 mb-8">
-
           <button
             onClick={() => navigate('/workshops')}
             className="text-sm text-gray-500 hover:text-blue-600 transition"
@@ -102,10 +108,8 @@ export default function ManageApplicationsPage() {
           >
             My Workshops
           </button>
-
         </div>
 
-        {/* Heading */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
             Manage Applications
@@ -116,29 +120,23 @@ export default function ManageApplicationsPage() {
           </p>
         </div>
 
-        {/* Error */}
         {error && (
           <div className="bg-red-100 text-red-700 px-4 py-3 rounded-lg mb-6">
             {error}
           </div>
         )}
 
-        {/* No Applications */}
         {applications.length === 0 ? (
-
           <div className="bg-white rounded-xl border border-gray-200 p-10 text-center">
-
             <h2 className="text-xl font-semibold text-gray-800">
               No applicants yet
             </h2>
 
             <p className="text-gray-500 mt-2">
-              When learners apply to this workshop, their applications
-              will appear here.
+              When learners apply to this workshop, their applications will appear here.
             </p>
 
             <div className="flex justify-center gap-3 mt-6">
-
               <button
                 onClick={() => navigate('/workshops')}
                 className="border border-gray-300 text-gray-700 px-5 py-2.5 rounded-lg hover:bg-gray-50 transition"
@@ -152,22 +150,15 @@ export default function ManageApplicationsPage() {
               >
                 My Workshops
               </button>
-
             </div>
-
           </div>
-
         ) : (
-
           <div className="space-y-4">
-
             {applications.map((application) => (
-
               <div
                 key={application.id}
                 className="bg-white rounded-xl border border-gray-200 shadow-sm p-6"
               >
-
                 <h2 className="text-xl font-bold text-gray-900">
                   {application.learnerName}
                 </h2>
@@ -177,49 +168,37 @@ export default function ManageApplicationsPage() {
                 </p>
 
                 <p className="text-sm text-gray-500 mt-3">
-                  Applied on:{' '}
-                  {new Date(application.appliedAt).toLocaleString('en-IN')}
+                  Applied on: {new Date(application.appliedAt).toLocaleString('en-IN')}
                 </p>
 
                 <p className="mt-3 text-gray-700">
-                  <strong>Status:</strong>{' '}
-                  {application.status}
+                  <strong>Status:</strong> {application.status}
                 </p>
 
                 {application.status === 'PENDING' && (
                   <div className="flex gap-3 mt-5">
-
                     <button
-                      onClick={() =>
-                        updateStatus(application.id, 'ACCEPTED')
-                      }
-                      className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                      onClick={() => updateStatus(application.id, 'ACCEPTED')}
+                      disabled={updatingId === application.id}
+                      className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Accept
+                      {updatingId === application.id ? 'Updating...' : 'Accept'}
                     </button>
 
                     <button
-                      onClick={() =>
-                        updateStatus(application.id, 'REJECTED')
-                      }
-                      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+                      onClick={() => updateStatus(application.id, 'REJECTED')}
+                      disabled={updatingId === application.id}
+                      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Reject
                     </button>
-
                   </div>
                 )}
-
               </div>
-
             ))}
-
           </div>
-
         )}
-
       </main>
-
     </div>
   );
 }
