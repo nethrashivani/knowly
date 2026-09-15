@@ -10,6 +10,7 @@ import lombok.*;
 public class SkillDTO {
 
     private Long id;
+    private Long ownerId;
     private String ownerEmail;
 
     @NotBlank(message = "Title is required")
