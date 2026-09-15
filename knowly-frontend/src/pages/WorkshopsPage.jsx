@@ -40,13 +40,13 @@ export default function WorkshopsPage() {
   }, []);
 
   const filtered = useMemo(() => {
-    // Explore Workshops is strictly for public workshops created by other users.
+    // Explore Workshops is public-only: no room-bound workshops and never the current user's own workshop.
     const source = viewMode === 'all'
-      ? workshops.filter((w) => !(user?.email && w.teacherEmail === user.email))
+      ? workshops.filter((w) => !w.roomId && !w.roomName && !(user?.email && w.teacherEmail === user.email))
       : workshops;
     const q = search.trim().toLowerCase();
     if (!q) return source;
-    return source.filter((w) => [w.title, w.description, w.teacherName, w.location].some((v) => v?.toLowerCase().includes(q)));
+    return source.filter((w) => [w.title, w.description, w.teacherName, w.location, w.roomName].some((v) => v?.toLowerCase().includes(q)));
   }, [workshops, search, viewMode, user?.email]);
 
   const handleApply = async (id) => {
