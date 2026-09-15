@@ -22,23 +22,22 @@ public class RatingController {
     }
 
     @PostMapping
-    public ResponseEntity<RatingDTO> createRating(
-            Authentication authentication,
-            @Valid @RequestBody RatingDTO dto) {
-
-        String reviewerEmail = authentication.getName();
-
-        return ResponseEntity.ok(
-                ratingService.createRating(reviewerEmail, dto)
-        );
+    public ResponseEntity<RatingDTO> createRating(Authentication authentication, @Valid @RequestBody RatingDTO dto) {
+        return ResponseEntity.ok(ratingService.createRating(authentication.getName(), dto));
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<RatingDTO>> getRatingsForUser(
-            @PathVariable Long userId) {
+    public ResponseEntity<List<RatingDTO>> getRatingsForUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(ratingService.getRatingsForUser(userId));
+    }
 
-        return ResponseEntity.ok(
-                ratingService.getRatingsForUser(userId)
-        );
+    @GetMapping("/workshop/{workshopId}")
+    public ResponseEntity<List<RatingDTO>> getRatingsForWorkshop(@PathVariable Long workshopId) {
+        return ResponseEntity.ok(ratingService.getRatingsForWorkshop(workshopId));
+    }
+
+    @GetMapping("/workshop/{workshopId}/mine")
+    public ResponseEntity<RatingDTO> getMyRatingForWorkshop(Authentication authentication, @PathVariable Long workshopId) {
+        return ResponseEntity.ok(ratingService.getMyRatingForWorkshop(authentication.getName(), workshopId));
     }
 }
