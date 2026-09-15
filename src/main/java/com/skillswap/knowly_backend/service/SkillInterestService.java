@@ -14,8 +14,6 @@ import java.util.List;
 @Service
 public class SkillInterestService {
 
-    private static final int WORKSHOP_DEMAND_THRESHOLD = 1;
-
     private final SkillInterestRepository skillInterestRepository;
     private final SkillRepository skillRepository;
     private final UserRepository userRepository;
@@ -45,8 +43,7 @@ public class SkillInterestService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (skill.getOwner().getEmail().equals(learnerEmail)) {
-            throw new RuntimeException(
-                    "You cannot express interest in your own skill");
+            throw new RuntimeException("You cannot express interest in your own skill");
         }
 
         boolean alreadyInterested = skillInterestRepository
@@ -54,8 +51,7 @@ public class SkillInterestService {
                 .isPresent();
 
         if (alreadyInterested) {
-            throw new RuntimeException(
-                    "You are already interested in this skill");
+            throw new RuntimeException("You are already interested in this skill");
         }
 
         SkillInterest interest = SkillInterest.builder()
@@ -66,61 +62,17 @@ public class SkillInterestService {
 
         skillInterestRepository.save(interest);
 
-        // Existing in-app notification
         notificationService.createNotification(
                 skill.getOwner().getEmail(),
-                learner.getName()
-                        + " is interested in learning your skill: "
-                        + skill.getTitle());
+                learner.getName() + " is interested in learning your skill: " + skill.getTitle());
 
-        // Check whether the skill has reached high demand
-        long interestCount =
-                skillInterestRepository.countBySkill_Id(skillId);
-
-        if (interestCount == WORKSHOP_DEMAND_THRESHOLD) {
-
-            String emailSubject =
-                    "High demand for your " + skill.getTitle()
-                            + " skill on Knowly";
-
-            String emailBody =
-                    "Hi " + skill.getOwner().getName() + ",\n\n"
-                    + "Your skill \"" + skill.getTitle()
-                    + "\" has reached "
-                    + interestCount
-                    + " interested learners on Knowly.\n\n"
-                    + "There is strong demand for this skill! "
-                    + "You can consider conducting a workshop "
-                    + "to help these learners learn it.\n\n"
-                    + "This could be a great opportunity to share "
-                    + "your knowledge with the Knowly community.\n\n"
-                    + "Regards,\n"
-                    + "Knowly";
-
-            try {
-                emailService.sendEmail(
-                        skill.getOwner().getEmail(),
-                        emailSubject,
-                        emailBody
-                );
-
-                System.out.println(
-                        "Workshop demand email sent to "
-                                + skill.getOwner().getEmail()
-                                + " for skill: "
-                                + skill.getTitle()
-                );
-
-            } catch (Exception e) {
-                // Email failure should not undo the student's interest
-                System.err.println(
-                        "Failed to send workshop demand email to "
-                                + skill.getOwner().getEmail()
-                                + ": "
-                                + e.getMessage()
-                );
-            }
-        }
+        sendEmailSafely(
+                skill.getOwner().getEmail(),
+                "Someone is interested in your Knowly skill",
+                "Hi " + skill.getOwner().getName() + ",\n\n"
+                        + learner.getName() + " (" + learner.getEmail() + ") is interested in learning your skill \""
+                        + skill.getTitle() + "\".\n\n"
+                        + "Open Knowly to view the interested learner and connect with them.\n\nRegards,\nKnowly");
     }
 
     public void removeInterest(Long skillId, String learnerEmail) {
@@ -166,5 +118,13 @@ public class SkillInterestService {
         return skillInterestRepository
                 .findBySkill_IdAndLearner_Email(skillId, learnerEmail)
                 .isPresent();
+    }
+
+    private void sendEmailSafely(String to, String subject, String body) {
+        try {
+            emailService.sendEmail(to, subject, body);
+        } catch (Exception e) {
+            System.err.println("Failed to send Knowly email to " + to + ": " + e.getMessage());
+        }
     }
 }
