@@ -1,69 +1,25 @@
 package com.skillswap.knowly_backend.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class EmailService {
 
-    private final ObjectMapper objectMapper;
-    private final HttpClient httpClient;
-    private final String resendApiKey;
-    private final String fromEmail;
+    private final JavaMailSender mailSender;
 
-    public EmailService(
-            ObjectMapper objectMapper,
-            @Value("${RESEND_API_KEY}") String resendApiKey,
-            @Value("${RESEND_FROM_EMAIL:onboarding@resend.dev}") String fromEmail
-    ) {
-        this.objectMapper = objectMapper;
-        this.httpClient = HttpClient.newHttpClient();
-        this.resendApiKey = resendApiKey;
-        this.fromEmail = fromEmail;
+    public EmailService(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
     }
 
     public void sendEmail(String to, String subject, String body) {
-        try {
-            Map<String, Object> payload = new HashMap<>();
-            payload.put("from", fromEmail);
-            payload.put("to", List.of(to));
-            payload.put("subject", subject);
-            payload.put("text", body);
+        SimpleMailMessage message = new SimpleMailMessage();
 
-            String json = objectMapper.writeValueAsString(payload);
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
 
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.resend.com/emails"))
-                    .header("Authorization", "Bearer " + resendApiKey)
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(json))
-                    .build();
-
-            HttpResponse<String> response = httpClient.send(
-                    request,
-                    HttpResponse.BodyHandlers.ofString()
-            );
-
-            if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                throw new IllegalStateException(
-                        "Resend email failed (HTTP " + response.statusCode() + "): " + response.body()
-                );
-            }
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to send email through Resend", e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Email sending was interrupted", e);
-        }
+        mailSender.send(message);
     }
 }

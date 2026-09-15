@@ -6,6 +6,7 @@ import com.skillswap.knowly_backend.dto.RegisterRequest;
 import com.skillswap.knowly_backend.dto.ResendOtpRequest;
 import com.skillswap.knowly_backend.dto.VerifyOtpRequest;
 import com.skillswap.knowly_backend.service.AuthService;
+import com.skillswap.knowly_backend.service.OtpService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -20,17 +21,14 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final OtpService otpService;
 
     @PostMapping("/register")
-    @Operation(summary = "Start registration and send email OTP")
-    public ResponseEntity<String> register(
+    @Operation(summary = "Register user and log in")
+    public ResponseEntity<AuthResponse> register(
             @Valid @RequestBody RegisterRequest request) {
 
-        authService.register(request);
-
-        return ResponseEntity.ok(
-                "OTP sent to your email. Please verify it to complete registration."
-        );
+        return ResponseEntity.ok(authService.register(request));
     }
 
     @PostMapping("/login")
@@ -42,7 +40,7 @@ public class AuthController {
 
     @PostMapping("/verify-otp")
     @Operation(summary = "Verify email OTP and complete registration")
-    public ResponseEntity<AuthResponse> verifyOtp(
+    public ResponseEntity<?> verifyOtp(
             @Valid @RequestBody VerifyOtpRequest request) {
 
         AuthResponse response = authService.verifyRegistrationOtp(
@@ -55,10 +53,10 @@ public class AuthController {
 
     @PostMapping("/resend-otp")
     @Operation(summary = "Resend email verification OTP")
-    public ResponseEntity<String> resendOtp(
+    public ResponseEntity<?> resendOtp(
             @Valid @RequestBody ResendOtpRequest request) {
 
-        authService.resendRegistrationOtp(request.getEmail());
+        otpService.generateAndSendOtp(request.getEmail());
 
         return ResponseEntity.ok(
                 "A new OTP has been sent to your email."
