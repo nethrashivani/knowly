@@ -27,7 +27,6 @@ public class WorkshopDTO {
 
     private String meetingUrl;
 
-    @NotNull
     @Min(1)
     private Integer capacity;
 
