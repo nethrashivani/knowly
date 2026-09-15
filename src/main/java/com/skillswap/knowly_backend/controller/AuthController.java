@@ -17,11 +17,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {
-        "http://localhost:5173",
-        "https://knowly-phi.vercel.app",
-        "https://knowly-oit-main-nethh1.vercel.app"
-})
 @Tag(name = "Auth API", description = "Register and Login")
 public class AuthController {
 
@@ -37,7 +32,6 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login user")
     public ResponseEntity<AuthResponse> login(
             @Valid @RequestBody LoginRequest request) {
 
