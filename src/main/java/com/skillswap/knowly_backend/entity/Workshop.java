@@ -35,6 +35,10 @@ public class Workshop {
     @Column(nullable = false)
     private Integer capacity;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean requiresAcceptance = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")
     private Room room;
