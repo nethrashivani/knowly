@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getToken } from './authService';
 
-const BASE_URL = 'http://https://knowly-lphd.onrender.com/api/skills';
+const BASE_URL = 'https://knowly-lphd.onrender.com/api/skills';
 
 const authHeaders = () => ({
     headers: { Authorization: `Bearer ${getToken()}` }
