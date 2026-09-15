@@ -101,7 +101,7 @@ public class SecurityConfig {
         "http://localhost:3000",
         "https://knowly-phi.vercel.app",
         "https://knowly-oit-main-nethh1.vercel.app"
-));a
+));
 
         config.setAllowedMethods(List.of(
                 "GET",
