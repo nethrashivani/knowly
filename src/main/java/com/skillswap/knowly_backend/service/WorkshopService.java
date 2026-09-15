@@ -25,42 +25,27 @@ public class WorkshopService {
         User teacher = findUser(email);
         validateMeetingUrl(dto);
         Room activeRoom = teacher.getRoom();
-
-        if (activeRoom == null) {
-            throw new IllegalArgumentException("Join or create a room before creating a workshop");
-        }
+        if (activeRoom == null) throw new IllegalArgumentException("Join or create a room before creating a workshop");
         if (dto.isRequiresAcceptance() && (dto.getCapacity() == null || dto.getCapacity() < 1)) {
             throw new IllegalArgumentException("Capacity is required for workshops with manual acceptance");
         }
-
         Workshop workshop = Workshop.builder()
-                .title(dto.getTitle())
-                .description(dto.getDescription())
-                .dateTime(dto.getDateTime())
-                .location(dto.getLocation())
-                .meetingUrl(dto.getMeetingUrl())
+                .title(dto.getTitle()).description(dto.getDescription()).dateTime(dto.getDateTime())
+                .location(dto.getLocation()).meetingUrl(dto.getMeetingUrl())
                 .capacity(dto.isRequiresAcceptance() ? dto.getCapacity() : 0)
-                .requiresAcceptance(dto.isRequiresAcceptance())
-                .room(activeRoom)
-                .teacher(teacher)
-                .build();
-
+                .requiresAcceptance(dto.isRequiresAcceptance()).room(activeRoom).teacher(teacher).build();
         return convertToDTO(workshopRepository.save(workshop));
     }
 
     public List<WorkshopDTO> getAllWorkshops(String email) {
         User user = findUser(email);
-        List<Workshop> workshops = user.getRoom() == null
-                ? List.of()
-                : workshopRepository.findByRoom_Id(user.getRoom().getId());
+        List<Workshop> workshops = user.getRoom() == null ? List.of() : workshopRepository.findByRoom_Id(user.getRoom().getId());
         return workshops.stream().map(this::convertToDTO).toList();
     }
 
     public WorkshopDTO getWorkshopById(Long id, String email) {
         User user = findUser(email);
-        Workshop workshop = workshopRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Workshop not found"));
-
+        Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RuntimeException("Workshop not found"));
         if (workshop.getRoom() != null && (user.getRoom() == null || !workshop.getRoom().getId().equals(user.getRoom().getId()))) {
             throw new RuntimeException("You are not a member of this workshop's room");
         }
@@ -69,6 +54,11 @@ public class WorkshopService {
 
     public List<WorkshopDTO> getMyWorkshops(String email) {
         return workshopRepository.findByTeacher_Email(email).stream().map(this::convertToDTO).toList();
+    }
+
+    public List<WorkshopDTO> getWorkshopsByTeacher(Long teacherId) {
+        if (!userRepository.existsById(teacherId)) throw new RuntimeException("User not found");
+        return workshopRepository.findByTeacher_Id(teacherId).stream().map(this::convertToDTO).toList();
     }
 
     public void deleteWorkshop(Long id, String email) {
@@ -92,19 +82,12 @@ public class WorkshopService {
 
     private WorkshopDTO convertToDTO(Workshop workshop) {
         return WorkshopDTO.builder()
-                .id(workshop.getId())
-                .title(workshop.getTitle())
-                .description(workshop.getDescription())
-                .dateTime(workshop.getDateTime())
-                .location(workshop.getLocation())
-                .meetingUrl(workshop.getMeetingUrl())
+                .id(workshop.getId()).title(workshop.getTitle()).description(workshop.getDescription())
+                .dateTime(workshop.getDateTime()).location(workshop.getLocation()).meetingUrl(workshop.getMeetingUrl())
                 .capacity(workshop.isRequiresAcceptance() ? workshop.getCapacity() : null)
-                .requiresAcceptance(workshop.isRequiresAcceptance())
-                .teacherId(workshop.getTeacher().getId())
-                .teacherName(workshop.getTeacher().getName())
-                .teacherEmail(workshop.getTeacher().getEmail())
+                .requiresAcceptance(workshop.isRequiresAcceptance()).teacherId(workshop.getTeacher().getId())
+                .teacherName(workshop.getTeacher().getName()).teacherEmail(workshop.getTeacher().getEmail())
                 .roomId(workshop.getRoom() == null ? null : workshop.getRoom().getId())
-                .roomName(workshop.getRoom() == null ? null : workshop.getRoom().getName())
-                .build();
+                .roomName(workshop.getRoom() == null ? null : workshop.getRoom().getName()).build();
     }
 }
