@@ -3,22 +3,19 @@ import { getToken } from './authService';
 
 const BASE_URL = 'https://knowly-lphd.onrender.com/api/profile';
 
-const authHeaders = () => ({
-  headers: {
-    Authorization: `Bearer ${getToken()}`
-  }
-});
+const authHeaders = () => ({ headers: { Authorization: `Bearer ${getToken()}` } });
 
 export const getMyProfile = async () => {
   const response = await axios.get(`${BASE_URL}/me`, authHeaders());
   return response.data;
 };
 
+export const getUserProfile = async (userId) => {
+  const response = await axios.get(`${BASE_URL}/user/${userId}`);
+  return response.data;
+};
+
 export const updateMyProfile = async (profileData) => {
-  const response = await axios.put(
-    `${BASE_URL}/me`,
-    profileData,
-    authHeaders()
-  );
+  const response = await axios.put(`${BASE_URL}/me`, profileData, authHeaders());
   return response.data;
 };
