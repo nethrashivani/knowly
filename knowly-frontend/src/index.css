@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Keep room invitation codes compact without changing other text. */
+.text-2xl.font-mono.tracking-widest.text-blue-800 {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
