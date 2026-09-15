@@ -31,6 +31,8 @@ public class WorkshopDTO {
     @Min(1)
     private Integer capacity;
 
+    private boolean requiresAcceptance;
+
     private Long teacherId;
     private String teacherName;
     private String teacherEmail;
