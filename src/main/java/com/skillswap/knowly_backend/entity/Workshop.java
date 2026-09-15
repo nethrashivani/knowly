@@ -29,8 +29,15 @@ public class Workshop {
     @Column(nullable = false)
     private String location;
 
+    @Column(length = 1000)
+    private String meetingUrl;
+
     @Column(nullable = false)
     private Integer capacity;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id")
+    private Room room;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "teacher_id", nullable = false)

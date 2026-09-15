@@ -22,53 +22,34 @@ public class WorkshopController {
     }
 
     @GetMapping
-    public ResponseEntity<List<WorkshopDTO>> getAllWorkshops() {
-        return ResponseEntity.ok(workshopService.getAllWorkshops());
+    public ResponseEntity<List<WorkshopDTO>> getAllWorkshops(Authentication authentication) {
+        return ResponseEntity.ok(workshopService.getAllWorkshops(authentication.getName()));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<WorkshopDTO> getWorkshopById(
-            @PathVariable Long id) {
-
-        return workshopService.getAllWorkshops()
-                .stream()
-                .filter(workshop -> workshop.getId().equals(id))
-                .findFirst()
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+            @PathVariable Long id,
+            Authentication authentication) {
+        return ResponseEntity.ok(workshopService.getWorkshopById(id, authentication.getName()));
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<WorkshopDTO>> getMyWorkshops(
-            Authentication authentication) {
-
-        return ResponseEntity.ok(
-                workshopService.getMyWorkshops(authentication.getName())
-        );
+    public ResponseEntity<List<WorkshopDTO>> getMyWorkshops(Authentication authentication) {
+        return ResponseEntity.ok(workshopService.getMyWorkshops(authentication.getName()));
     }
 
     @PostMapping
     public ResponseEntity<WorkshopDTO> createWorkshop(
             Authentication authentication,
             @Valid @RequestBody WorkshopDTO dto) {
-
-        return ResponseEntity.ok(
-                workshopService.createWorkshop(
-                        authentication.getName(), dto
-                )
-        );
+        return ResponseEntity.ok(workshopService.createWorkshop(authentication.getName(), dto));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteWorkshop(
             Authentication authentication,
             @PathVariable Long id) {
-
-        workshopService.deleteWorkshop(
-                id,
-                authentication.getName()
-        );
-
+        workshopService.deleteWorkshop(id, authentication.getName());
         return ResponseEntity.noContent().build();
     }
 }

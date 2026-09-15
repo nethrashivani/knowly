@@ -32,6 +32,10 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id")
+    private Room room;
+
     public enum Role {
         LEARNER, TEACHER, BOTH
     }

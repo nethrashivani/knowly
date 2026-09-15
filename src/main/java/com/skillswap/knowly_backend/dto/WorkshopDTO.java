@@ -25,6 +25,8 @@ public class WorkshopDTO {
     @NotBlank
     private String location;
 
+    private String meetingUrl;
+
     @NotNull
     @Min(1)
     private Integer capacity;
@@ -32,4 +34,6 @@ public class WorkshopDTO {
     private Long teacherId;
     private String teacherName;
     private String teacherEmail;
+    private Long roomId;
+    private String roomName;
 }

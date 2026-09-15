@@ -15,35 +15,50 @@ public class WorkshopService {
     private final WorkshopRepository workshopRepository;
     private final UserRepository userRepository;
 
-    public WorkshopService(
-            WorkshopRepository workshopRepository,
-            UserRepository userRepository) {
+    public WorkshopService(WorkshopRepository workshopRepository, UserRepository userRepository) {
         this.workshopRepository = workshopRepository;
         this.userRepository = userRepository;
     }
 
     public WorkshopDTO createWorkshop(String email, WorkshopDTO dto) {
-
-        User teacher = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User teacher = findUser(email);
+        validateMeetingUrl(dto);
 
         Workshop workshop = Workshop.builder()
                 .title(dto.getTitle())
                 .description(dto.getDescription())
                 .dateTime(dto.getDateTime())
                 .location(dto.getLocation())
+                .meetingUrl(dto.getMeetingUrl())
                 .capacity(dto.getCapacity())
+                .room(teacher.getRoom())
                 .teacher(teacher)
                 .build();
 
         return convertToDTO(workshopRepository.save(workshop));
     }
 
-    public List<WorkshopDTO> getAllWorkshops() {
-        return workshopRepository.findAll()
-                .stream()
-                .map(this::convertToDTO)
-                .toList();
+    public List<WorkshopDTO> getAllWorkshops(String email) {
+        User user = findUser(email);
+        List<Workshop> workshops = user.getRoom() == null
+                ? workshopRepository.findAll()
+                : workshopRepository.findByRoom_Id(user.getRoom().getId());
+
+        return workshops.stream().map(this::convertToDTO).toList();
+    }
+
+    public WorkshopDTO getWorkshopById(Long id, String email) {
+        User user = findUser(email);
+        Workshop workshop = workshopRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Workshop not found"));
+
+        if (workshop.getRoom() != null) {
+            if (user.getRoom() == null || !workshop.getRoom().getId().equals(user.getRoom().getId())) {
+                throw new RuntimeException("You are not a member of this workshop's room");
+            }
+        }
+
+        return convertToDTO(workshop);
     }
 
     public List<WorkshopDTO> getMyWorkshops(String email) {
@@ -54,7 +69,6 @@ public class WorkshopService {
     }
 
     public void deleteWorkshop(Long id, String email) {
-
         Workshop workshop = workshopRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Workshop not found"));
 
@@ -65,17 +79,39 @@ public class WorkshopService {
         workshopRepository.delete(workshop);
     }
 
+    private User findUser(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    private void validateMeetingUrl(WorkshopDTO dto) {
+        boolean online = "online".equalsIgnoreCase(dto.getLocation().trim());
+        String url = dto.getMeetingUrl();
+
+        if (online && (url == null || url.isBlank())) {
+            throw new IllegalArgumentException("Meeting URL is required for online workshops");
+        }
+
+        if (url != null && !url.isBlank()
+                && !(url.startsWith("https://") || url.startsWith("http://"))) {
+            throw new IllegalArgumentException("Meeting URL must start with http:// or https://");
+        }
+    }
+
     private WorkshopDTO convertToDTO(Workshop workshop) {
-    return WorkshopDTO.builder()
-            .id(workshop.getId())
-            .title(workshop.getTitle())
-            .description(workshop.getDescription())
-            .dateTime(workshop.getDateTime())
-            .location(workshop.getLocation())
-            .capacity(workshop.getCapacity())
-            .teacherId(workshop.getTeacher().getId())
-            .teacherName(workshop.getTeacher().getName())
-            .teacherEmail(workshop.getTeacher().getEmail())
-            .build();
-}
+        return WorkshopDTO.builder()
+                .id(workshop.getId())
+                .title(workshop.getTitle())
+                .description(workshop.getDescription())
+                .dateTime(workshop.getDateTime())
+                .location(workshop.getLocation())
+                .meetingUrl(workshop.getMeetingUrl())
+                .capacity(workshop.getCapacity())
+                .teacherId(workshop.getTeacher().getId())
+                .teacherName(workshop.getTeacher().getName())
+                .teacherEmail(workshop.getTeacher().getEmail())
+                .roomId(workshop.getRoom() == null ? null : workshop.getRoom().getId())
+                .roomName(workshop.getRoom() == null ? null : workshop.getRoom().getName())
+                .build();
+    }
 }
