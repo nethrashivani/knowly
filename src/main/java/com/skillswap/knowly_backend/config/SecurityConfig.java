@@ -96,10 +96,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allow the deployed Knowly frontend and local development origins.
+        // Allow Vercel deployments and local development.
         config.setAllowedOriginPatterns(List.of(
                 "https://*.vercel.app",
-                "http://localhost:[*]"
+                "http://localhost:*"
         ));
 
         config.setAllowedMethods(List.of(
