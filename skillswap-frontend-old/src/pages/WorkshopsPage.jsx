@@ -13,7 +13,7 @@ import Navbar from '../components/Navbar';
 import axios from 'axios';
 
 const APPLICATIONS_URL =
-  'http://https://knowly-lphd.onrender.com/api/workshop-applications';
+  'http://localhost:8080/api/workshop-applications';
 
 function WorkshopsPage() {
   const navigate = useNavigate();

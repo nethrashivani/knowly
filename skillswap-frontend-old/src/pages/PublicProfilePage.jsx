@@ -30,7 +30,7 @@ function PublicProfilePage() {
       try {
         // 1. Load profile
         const profileResponse = await fetch(
-          `http://https://knowly-lphd.onrender.com/api/profile/user/${userId}`
+          `http://localhost:8080/api/profile/user/${userId}`
         );
 
         if (!profileResponse.ok) {

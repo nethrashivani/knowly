@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getToken } from './authService';
 
-const BASE_URL = 'http://https://knowly-lphd.onrender.com/api/workshops';
+const BASE_URL = 'http://localhost:8080/api/workshops';
 
 const authHeaders = () => ({
   headers: {
@@ -42,7 +42,7 @@ export const deleteWorkshop = async (id) => {
 
 export const applyForWorkshop = async (workshopId) => {
   const response = await axios.post(
-    `http://https://knowly-lphd.onrender.com/api/workshop-applications/workshop/${workshopId}`,
+    `http://localhost:8080/api/workshop-applications/workshop/${workshopId}`,
     {},
     authHeaders()
   );

@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getToken } from './authService';
 
 const BASE_URL =
-  'http://https://knowly-lphd.onrender.com/api/workshop-applications';
+  'http://localhost:8080/api/workshop-applications';
 
 const authHeaders = () => ({
   headers: {
