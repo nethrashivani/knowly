@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://https://knowly-lphd.onrender.com/api/auth';
+const BASE_URL = 'https://knowly-lphd.onrender.com/api/auth';
 
 export const register = async (data) => {
     const response = await axios.post(
