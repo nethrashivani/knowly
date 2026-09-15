@@ -40,11 +40,32 @@ public class WorkshopApplicationService {
         if (workshop.getTeacher().getEmail().equals(learnerEmail)) throw new RuntimeException("You cannot apply to your own workshop");
         if (applicationRepository.findByWorkshop_IdAndLearner_Email(workshopId, learnerEmail).isPresent()) throw new RuntimeException("You have already applied to this workshop");
 
-        long acceptedCount = applicationRepository.findByWorkshop_Id(workshopId).stream().filter(application -> application.getStatus() == ApplicationStatus.ACCEPTED).count();
+        long acceptedCount = applicationRepository.findByWorkshop_Id(workshopId).stream()
+                .filter(application -> application.getStatus() == ApplicationStatus.ACCEPTED)
+                .count();
         if (acceptedCount >= workshop.getCapacity()) throw new RuntimeException("Workshop is full");
 
-        WorkshopApplication saved = applicationRepository.save(WorkshopApplication.builder().workshop(workshop).learner(learner).status(ApplicationStatus.PENDING).appliedAt(LocalDateTime.now()).build());
-        notificationService.createNotification(workshop.getTeacher().getEmail(), learner.getName() + " applied to your workshop: " + workshop.getTitle());
+        ApplicationStatus initialStatus = workshop.isRequiresAcceptance()
+                ? ApplicationStatus.PENDING
+                : ApplicationStatus.ACCEPTED;
+
+        WorkshopApplication saved = applicationRepository.save(WorkshopApplication.builder()
+                .workshop(workshop)
+                .learner(learner)
+                .status(initialStatus)
+                .appliedAt(LocalDateTime.now())
+                .build());
+
+        if (workshop.isRequiresAcceptance()) {
+            notificationService.createNotification(
+                    workshop.getTeacher().getEmail(),
+                    learner.getName() + " applied to your workshop: " + workshop.getTitle());
+        } else {
+            notificationService.createNotification(
+                    learner.getEmail(),
+                    "You are enrolled in the workshop \"" + workshop.getTitle() + "\". No approval is required.");
+        }
+
         return convertToDTO(saved);
     }
 
@@ -63,7 +84,17 @@ public class WorkshopApplicationService {
         Workshop workshop = application.getWorkshop();
         User learner = application.getLearner();
         if (!workshop.getTeacher().getEmail().equals(teacherEmail)) throw new RuntimeException("You are not authorized to update this application");
+        if (!workshop.isRequiresAcceptance()) return convertToDTO(application);
         if (application.getStatus() != ApplicationStatus.PENDING) return convertToDTO(application);
+
+        if (status == ApplicationStatus.ACCEPTED) {
+            long acceptedCount = applicationRepository.findByWorkshop_Id(workshop.getId()).stream()
+                    .filter(item -> item.getStatus() == ApplicationStatus.ACCEPTED)
+                    .count();
+            if (acceptedCount >= workshop.getCapacity()) {
+                throw new RuntimeException("Workshop is full");
+            }
+        }
 
         application.setStatus(status);
         WorkshopApplication saved = applicationRepository.save(application);
