@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -21,28 +22,28 @@ public class RoomController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<RoomDTO> getMyRoom(Authentication authentication) {
-        RoomDTO room = roomService.getMyRoom(authentication.getName());
-        return room == null ? ResponseEntity.noContent().build() : ResponseEntity.ok(room);
+    public ResponseEntity<List<RoomDTO>> getMyRooms(Authentication authentication) {
+        return ResponseEntity.ok(roomService.getMyRooms(authentication.getName()));
     }
 
     @PostMapping
-    public ResponseEntity<RoomDTO> createRoom(
-            Authentication authentication,
-            @RequestBody Map<String, String> body) {
+    public ResponseEntity<RoomDTO> createRoom(Authentication authentication, @RequestBody Map<String, String> body) {
         return ResponseEntity.ok(roomService.createRoom(authentication.getName(), body.get("name")));
     }
 
     @PostMapping("/join")
-    public ResponseEntity<RoomDTO> joinRoom(
-            Authentication authentication,
-            @RequestBody Map<String, String> body) {
+    public ResponseEntity<RoomDTO> joinRoom(Authentication authentication, @RequestBody Map<String, String> body) {
         return ResponseEntity.ok(roomService.joinRoom(authentication.getName(), body.get("code")));
     }
 
-    @DeleteMapping("/my")
-    public ResponseEntity<Void> leaveRoom(Authentication authentication) {
-        roomService.leaveRoom(authentication.getName());
+    @PutMapping("/{roomId}/active")
+    public ResponseEntity<RoomDTO> switchRoom(Authentication authentication, @PathVariable Long roomId) {
+        return ResponseEntity.ok(roomService.switchRoom(authentication.getName(), roomId));
+    }
+
+    @DeleteMapping("/{roomId}/memberships")
+    public ResponseEntity<Void> leaveRoom(Authentication authentication, @PathVariable Long roomId) {
+        roomService.leaveRoom(authentication.getName(), roomId);
         return ResponseEntity.noContent().build();
     }
 }
