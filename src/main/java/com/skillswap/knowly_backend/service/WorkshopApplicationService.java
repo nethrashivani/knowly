@@ -60,8 +60,21 @@ public class WorkshopApplicationService {
 
         if (workshop.isRequiresAcceptance()) {
             notificationService.createNotification(workshop.getTeacher().getEmail(), learner.getName() + " applied to your workshop: " + workshop.getTitle());
+            sendEmailSafely(
+                    workshop.getTeacher().getEmail(),
+                    "New workshop application on Knowly",
+                    "Hi " + workshop.getTeacher().getName() + ",\n\n"
+                            + learner.getName() + " (" + learner.getEmail() + ") has applied to your workshop \""
+                            + workshop.getTitle() + "\".\n\n"
+                            + "Please open Knowly to review the application.\n\nRegards,\nKnowly");
         } else {
             notificationService.createNotification(learner.getEmail(), "You are enrolled in the workshop \"" + workshop.getTitle() + "\". No approval is required.");
+            sendEmailSafely(
+                    learner.getEmail(),
+                    "You are enrolled in a Knowly workshop",
+                    "Hi " + learner.getName() + ",\n\n"
+                            + "You are enrolled in the workshop \"" + workshop.getTitle() + "\". No approval is required.\n\n"
+                            + "Workshop details:\nDate & Time: " + workshop.getDateTime() + "\nLocation: " + workshop.getLocation() + "\n\nRegards,\nKnowly");
         }
 
         return convertToDTO(saved);
@@ -97,16 +110,31 @@ public class WorkshopApplicationService {
 
         if (status == ApplicationStatus.ACCEPTED) {
             notificationService.createNotification(learner.getEmail(), "Your application for the workshop \"" + workshop.getTitle() + "\" has been accepted.");
-            try {
-                String body = "Hi " + learner.getName() + ",\n\nGood news! Your application for the workshop \"" + workshop.getTitle() + "\" has been accepted.\n\nWorkshop details:\nWorkshop: " + workshop.getTitle() + "\nDate & Time: " + workshop.getDateTime() + "\nLocation: " + workshop.getLocation() + "\n\nRegards,\nKnowly";
-                emailService.sendEmail(learner.getEmail(), "Your Knowly workshop application was accepted", body);
-            } catch (Exception e) {
-                System.err.println("Failed to send acceptance email to " + learner.getEmail() + ": " + e.getMessage());
-            }
+            sendEmailSafely(
+                    learner.getEmail(),
+                    "Your Knowly workshop application was accepted",
+                    "Hi " + learner.getName() + ",\n\n"
+                            + "Good news! Your application for the workshop \"" + workshop.getTitle() + "\" has been accepted.\n\n"
+                            + "Workshop details:\nWorkshop: " + workshop.getTitle() + "\nDate & Time: " + workshop.getDateTime()
+                            + "\nLocation: " + workshop.getLocation() + "\n\nRegards,\nKnowly");
         } else if (status == ApplicationStatus.REJECTED) {
             notificationService.createNotification(learner.getEmail(), "Your application for the workshop \"" + workshop.getTitle() + "\" has been rejected.");
+            sendEmailSafely(
+                    learner.getEmail(),
+                    "Update on your Knowly workshop application",
+                    "Hi " + learner.getName() + ",\n\n"
+                            + "Your application for the workshop \"" + workshop.getTitle() + "\" was not accepted this time.\n\n"
+                            + "You can explore other workshops on Knowly.\n\nRegards,\nKnowly");
         }
         return convertToDTO(saved);
+    }
+
+    private void sendEmailSafely(String to, String subject, String body) {
+        try {
+            emailService.sendEmail(to, subject, body);
+        } catch (Exception e) {
+            System.err.println("Failed to send Knowly email to " + to + ": " + e.getMessage());
+        }
     }
 
     private WorkshopApplicationDTO convertToDTO(WorkshopApplication application) {
