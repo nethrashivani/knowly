@@ -12,6 +12,7 @@ import MySkillsPage from './pages/MySkillsPage';
 import MyInterestsPage from './pages/MyInterestsPage';
 import SkillsPage from './pages/SkillsPage';
 import WorkshopsPage from './pages/WorkshopsPage';
+import WorkshopDetailsPage from './pages/WorkshopDetailsPage';
 import CreateWorkshopPage from './pages/CreateWorkshopPage';
 import MyWorkshopsPage from './pages/MyWorkshopsPage';
 import MyApplicationsPage from './pages/MyApplicationsPage';
@@ -43,6 +44,7 @@ function App() {
         <Route path="/my-interests" element={<ProtectedRoute><MyInterestsPage /></ProtectedRoute>} />
         <Route path="/users/:userId" element={<ProtectedRoute><PublicProfilePage /></ProtectedRoute>} />
         <Route path="/workshops" element={<ProtectedRoute><WorkshopsPage /></ProtectedRoute>} />
+        <Route path="/workshops/:workshopId" element={<ProtectedRoute><WorkshopDetailsPage /></ProtectedRoute>} />
         <Route path="/workshops/create" element={<ProtectedRoute><CreateWorkshopPage /></ProtectedRoute>} />
         <Route path="/my-workshops" element={<ProtectedRoute><MyWorkshopsPage /></ProtectedRoute>} />
         <Route path="/my-applications" element={<ProtectedRoute><MyApplicationsPage /></ProtectedRoute>} />
