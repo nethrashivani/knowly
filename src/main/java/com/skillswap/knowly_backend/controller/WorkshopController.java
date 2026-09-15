@@ -27,9 +27,7 @@ public class WorkshopController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<WorkshopDTO> getWorkshopById(
-            @PathVariable Long id,
-            Authentication authentication) {
+    public ResponseEntity<WorkshopDTO> getWorkshopById(@PathVariable Long id, Authentication authentication) {
         return ResponseEntity.ok(workshopService.getWorkshopById(id, authentication.getName()));
     }
 
@@ -38,17 +36,18 @@ public class WorkshopController {
         return ResponseEntity.ok(workshopService.getMyWorkshops(authentication.getName()));
     }
 
+    @GetMapping("/teacher/{teacherId}")
+    public ResponseEntity<List<WorkshopDTO>> getWorkshopsByTeacher(@PathVariable Long teacherId) {
+        return ResponseEntity.ok(workshopService.getWorkshopsByTeacher(teacherId));
+    }
+
     @PostMapping
-    public ResponseEntity<WorkshopDTO> createWorkshop(
-            Authentication authentication,
-            @Valid @RequestBody WorkshopDTO dto) {
+    public ResponseEntity<WorkshopDTO> createWorkshop(Authentication authentication, @Valid @RequestBody WorkshopDTO dto) {
         return ResponseEntity.ok(workshopService.createWorkshop(authentication.getName(), dto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteWorkshop(
-            Authentication authentication,
-            @PathVariable Long id) {
+    public ResponseEntity<Void> deleteWorkshop(Authentication authentication, @PathVariable Long id) {
         workshopService.deleteWorkshop(id, authentication.getName());
         return ResponseEntity.noContent().build();
     }
