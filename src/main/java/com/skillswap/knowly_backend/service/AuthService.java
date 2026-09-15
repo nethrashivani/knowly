@@ -30,37 +30,23 @@ public class AuthService {
             throw new RuntimeException("Email already registered");
         }
 
-        /*
-         * If the user previously started registration but did not
-         * complete OTP verification, remove that old pending record.
-         *
-         * We explicitly flush the DELETE before inserting the new
-         * pending registration to avoid a duplicate-email constraint
-         * error caused by Hibernate delaying the DELETE.
-         */
-        pendingRegistrationRepository
-                .findByEmail(request.getEmail())
-                .ifPresent(existingRegistration -> {
-                    pendingRegistrationRepository.delete(existingRegistration);
-                    pendingRegistrationRepository.flush();
-                });
+        User user = User.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(User.Role.BOTH)
+                .build();
 
-        PendingRegistration pendingRegistration =
-                PendingRegistration.builder()
-                        .name(request.getName())
-                        .email(request.getEmail())
-                        .password(
-                                passwordEncoder.encode(request.getPassword())
-                        )
-                        .build();
+        userRepository.save(user);
 
-        pendingRegistrationRepository.save(pendingRegistration);
+        String token = jwtUtil.generateToken(user.getEmail());
 
-        // Send OTP to the user's email.
-        otpService.generateAndSendOtp(request.getEmail());
-
-        // The real User account is created only after OTP verification.
-        return null;
+        return AuthResponse.builder()
+                .token(token)
+                .name(user.getName())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .build();
     }
 
     @Transactional
@@ -94,11 +80,6 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
-
-        /*
-         * Remove the temporary registration after the real
-         * account has been created.
-         */
         pendingRegistrationRepository.delete(pendingRegistration);
 
         String token = jwtUtil.generateToken(user.getEmail());
