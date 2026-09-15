@@ -35,7 +35,7 @@ public class WorkshopApplicationService {
         User learner = userRepository.findByEmail(learnerEmail).orElseThrow(() -> new RuntimeException("User not found"));
 
         if (workshop.getRoom() != null && (learner.getRoom() == null || !workshop.getRoom().getId().equals(learner.getRoom().getId()))) {
-            throw new RuntimeException("You must be a member of this workshop's room");
+            throw new RuntimeException("You must switch to this workshop's room before applying");
         }
         if (workshop.getTeacher().getEmail().equals(learnerEmail)) throw new RuntimeException("You cannot apply to your own workshop");
         if (applicationRepository.findByWorkshop_IdAndLearner_Email(workshopId, learnerEmail).isPresent()) throw new RuntimeException("You have already applied to this workshop");
@@ -70,7 +70,6 @@ public class WorkshopApplicationService {
 
         if (status == ApplicationStatus.ACCEPTED) {
             notificationService.createNotification(learner.getEmail(), "Your application for the workshop \"" + workshop.getTitle() + "\" has been accepted.");
-            // Do not make the HTTP status update wait for SMTP on Render/free hosting.
             try {
                 String body = "Hi " + learner.getName() + ",\n\nGood news! Your application for the workshop \"" + workshop.getTitle() + "\" has been accepted.\n\nWorkshop details:\nWorkshop: " + workshop.getTitle() + "\nDate & Time: " + workshop.getDateTime() + "\nLocation: " + workshop.getLocation() + "\n\nRegards,\nKnowly";
                 emailService.sendEmail(learner.getEmail(), "Your Knowly workshop application was accepted", body);
