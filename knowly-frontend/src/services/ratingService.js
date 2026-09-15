@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getToken } from './authService';
 
-const BASE_URL = 'http://https://knowly-lphd.onrender.com/api/ratings';
+const BASE_URL = 'https://knowly-lphd.onrender.com/api/ratings';
 
 const authHeaders = () => ({
   headers: {
@@ -15,10 +15,6 @@ export const getRatingsForUser = async (userId) => {
 };
 
 export const createRating = async (ratingData) => {
-  const response = await axios.post(
-    BASE_URL,
-    ratingData,
-    authHeaders()
-  );
+  const response = await axios.post(BASE_URL, ratingData, authHeaders());
   return response.data;
 };
