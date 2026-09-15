@@ -6,6 +6,7 @@ export const getAllWorkshops = async () => (await axios.get(BASE_URL, authHeader
 export const getRoomWorkshops = async (roomId) => (await axios.get(`${BASE_URL}/room/${roomId}`, authHeaders())).data;
 export const getWorkshopById = async (workshopId) => (await axios.get(`${BASE_URL}/${workshopId}`, authHeaders())).data;
 export const getMyWorkshops = async () => (await axios.get(`${BASE_URL}/my`, authHeaders())).data;
+export const getWorkshopsByTeacher = async (teacherId) => (await axios.get(`${BASE_URL}/teacher/${teacherId}`, authHeaders())).data;
 export const createWorkshop = async (workshopData) => (await axios.post(BASE_URL, workshopData, authHeaders())).data;
 export const deleteWorkshop = async (id) => { await axios.delete(`${BASE_URL}/${id}`, authHeaders()); };
 export const applyForWorkshop = async (workshopId) => (await axios.post(`https://knowly-lphd.onrender.com/api/workshop-applications/workshop/${workshopId}`, {}, authHeaders())).data;
