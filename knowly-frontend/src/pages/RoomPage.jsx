@@ -2,17 +2,21 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { createRoom, getMyRooms, joinRoom, leaveRoom, switchRoom } from '../services/roomService';
-import { getAllWorkshops } from '../services/workshopService';
+import { getAllWorkshops, applyForWorkshop } from '../services/workshopService';
+import { getMyApplications } from '../services/workshopApplicationService';
 
 export default function RoomPage() {
   const navigate = useNavigate();
   const [rooms, setRooms] = useState([]);
   const [roomWorkshops, setRoomWorkshops] = useState([]);
+  const [applications, setApplications] = useState([]);
+  const [selectedWorkshopId, setSelectedWorkshopId] = useState(null);
   const [roomName, setRoomName] = useState('');
   const [code, setCode] = useState('');
   const [mode, setMode] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [applyingId, setApplyingId] = useState(null);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
@@ -24,14 +28,35 @@ export default function RoomPage() {
       setError('');
       const active = data.find((room) => room.active);
       if (active) {
-        try { setRoomWorkshops(await getAllWorkshops()); } catch { setRoomWorkshops([]); }
-      } else setRoomWorkshops([]);
+        try {
+          const [workshops, myApplications] = await Promise.all([getAllWorkshops(), getMyApplications()]);
+          setRoomWorkshops(workshops);
+          setApplications(myApplications);
+        } catch {
+          setRoomWorkshops([]);
+          setApplications([]);
+        }
+      } else {
+        setRoomWorkshops([]);
+        setApplications([]);
+        setSelectedWorkshopId(null);
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load rooms.');
     } finally { setLoading(false); }
   };
 
   useEffect(() => { loadRooms(); }, []);
+
+  const refreshRoomWorkshops = async () => {
+    try {
+      const [workshops, myApplications] = await Promise.all([getAllWorkshops(), getMyApplications()]);
+      setRoomWorkshops(workshops);
+      setApplications(myApplications);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to refresh room workshops.');
+    }
+  };
 
   const handleCreate = async (e) => {
     e.preventDefault(); if (!roomName.trim()) return;
@@ -48,7 +73,7 @@ export default function RoomPage() {
   };
 
   const handleSwitch = async (room) => {
-    try { setSaving(true); setError(''); await switchRoom(room.id); setMessage(`Switched to "${room.name}".`); await loadRooms(); }
+    try { setSaving(true); setError(''); await switchRoom(room.id); setMessage(`Switched to "${room.name}".`); setSelectedWorkshopId(null); await loadRooms(); }
     catch (err) { setError(err.response?.data?.message || 'Failed to switch rooms.'); }
     finally { setSaving(false); }
   };
@@ -60,12 +85,25 @@ export default function RoomPage() {
     finally { setSaving(false); }
   };
 
+  const handleApply = async (workshopId) => {
+    try {
+      setApplyingId(workshopId); setError('');
+      const application = await applyForWorkshop(workshopId);
+      setApplications((prev) => [...prev.filter((item) => item.id !== application.id && item.workshopId !== workshopId), application]);
+      setMessage('Application submitted successfully.');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to apply for workshop.');
+    } finally { setApplyingId(null); }
+  };
+
   const copyCode = async (room) => {
     try { await navigator.clipboard.writeText(room.code); setMessage('Room code copied to your clipboard.'); setError(''); }
     catch { setError('Could not copy automatically. Please copy the code manually.'); }
   };
 
   const formatDate = (value) => new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const formatTime = (value) => new Date(value).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' });
+  const getApplication = (workshopId) => applications.find((application) => String(application.workshopId) === String(workshopId));
 
   if (loading) return <><Navbar /><div className="min-h-screen bg-gray-50 p-8 text-center text-gray-500">Loading your rooms...</div></>;
   const activeRoom = rooms.find((room) => room.active);
@@ -90,11 +128,17 @@ export default function RoomPage() {
         {rooms.length === 0 ? <div className="bg-white rounded-2xl shadow p-10 text-center"><h2 className="text-xl font-bold">You are not in any rooms yet</h2><p className="text-gray-500 mt-2">Create your organization's room or join one using an invitation code.</p></div> : <div className="grid md:grid-cols-2 gap-6">{rooms.map((room) => <div key={room.id} className={`bg-white rounded-2xl shadow p-6 border-2 ${room.active ? 'border-blue-500' : 'border-transparent'}`}>
           <div className="flex justify-between gap-3"><div>{room.active && <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded-full">ACTIVE ROOM</span>}<h2 className="text-xl font-bold text-gray-900 mt-2">{room.name}</h2><p className="text-sm text-gray-500 mt-1">Created by {room.ownerName}</p></div>{room.active && <span className="text-green-600 text-sm font-semibold">● Active</span>}</div>
           {room.owner ? <div className="mt-5 rounded-xl bg-blue-50 border border-blue-100 p-4"><p className="text-xs text-blue-700 font-semibold">OWNER INVITATION CODE</p><div className="flex items-center justify-between gap-3 mt-1"><span className="text-2xl font-mono font-bold tracking-widest text-blue-800">{room.code}</span><button onClick={() => copyCode(room)} className="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm">Copy</button></div><p className="text-xs text-blue-600 mt-2">Only you can see this code. Share it privately with your employees.</p></div> : <div className="mt-5 rounded-xl bg-gray-50 border p-4 text-sm text-gray-600">You are a member of this organization room. The invitation code is visible only to its owner.</div>}
-          <div className="mt-5 flex gap-2">{!room.active ? <button disabled={saving} onClick={() => handleSwitch(room)} className="flex-1 bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm disabled:opacity-50">Enter Room</button> : <button onClick={() => document.getElementById('room-workshops')?.scrollIntoView({ behavior: 'smooth' })} className="flex-1 bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm">View Workshops</button>}<button disabled={saving} onClick={() => handleLeave(room)} className="border border-red-200 text-red-600 px-4 py-2.5 rounded-lg text-sm disabled:opacity-50">Leave</button></div>
+          <div className="mt-5 flex gap-2">{!room.active ? <button disabled={saving} onClick={() => handleSwitch(room)} className="flex-1 bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm disabled:opacity-50">Enter Room</button> : <div className="flex-1 bg-blue-50 text-blue-700 px-4 py-2.5 rounded-lg text-center text-sm font-semibold">You are inside this room</div>}<button disabled={saving} onClick={() => handleLeave(room)} className="border border-red-200 text-red-600 px-4 py-2.5 rounded-lg text-sm disabled:opacity-50">Leave</button></div>
         </div>)}</div>}
 
-        {activeRoom && <section id="room-workshops" className="mt-10"><div className="flex items-end justify-between gap-4 mb-5"><div><p className="text-sm font-semibold text-blue-600">{activeRoom.name}</p><h2 className="text-2xl font-bold text-gray-900">Workshops inside this room</h2><p className="text-gray-500 mt-1">Only members of this room can access these workshops.</p></div><button onClick={() => navigate('/workshops/create', { state: { returnTo: '/room' } })} className="hidden sm:block bg-blue-600 text-white px-4 py-2.5 rounded-lg font-medium">+ Create Workshop</button></div>
-          {roomWorkshops.length === 0 ? <div className="bg-white border border-gray-200 rounded-xl p-8 text-center"><h3 className="font-semibold text-gray-800">No workshops in this room yet.</h3><p className="text-gray-500 text-sm mt-1">Create the first workshop for {activeRoom.name}.</p></div> : <div className="grid grid-cols-1 md:grid-cols-2 gap-5">{roomWorkshops.map((workshop) => <button key={workshop.id} onClick={() => navigate(`/workshops/${workshop.id}?fromRoom=true`)} className="text-left bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-300 transition p-6"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-semibold text-blue-600">ROOM WORKSHOP</p><h3 className="text-xl font-bold text-gray-900 mt-1">{workshop.title}</h3></div><span className="text-blue-600 text-sm">Open →</span></div><p className="text-gray-600 text-sm mt-3 line-clamp-2">{workshop.description}</p><div className="mt-4 text-sm text-gray-500"><p>{formatDate(workshop.dateTime)} · {new Date(workshop.dateTime).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}</p><p className="mt-1">Host: {workshop.teacherName}</p></div></button>)}</div>}
+        {activeRoom && <section id="room-workshops" className="mt-10"><div className="flex items-end justify-between gap-4 mb-5"><div><p className="text-sm font-semibold text-blue-600">{activeRoom.name}</p><h2 className="text-2xl font-bold text-gray-900">Workshops inside this room</h2><p className="text-gray-500 mt-1">Open, apply, and join workshops without leaving this room.</p></div><button onClick={refreshRoomWorkshops} className="text-sm text-blue-600 font-medium hover:text-blue-800">Refresh</button></div>
+          {roomWorkshops.length === 0 ? <div className="bg-white border border-gray-200 rounded-xl p-8 text-center"><h3 className="font-semibold text-gray-800">No workshops in this room yet.</h3><p className="text-gray-500 text-sm mt-1">Create the first workshop for {activeRoom.name}.</p></div> : <div className="grid grid-cols-1 md:grid-cols-2 gap-5">{roomWorkshops.map((workshop) => { const application = getApplication(workshop.id); const expanded = selectedWorkshopId === workshop.id; return <div key={workshop.id} className={`bg-white rounded-xl border shadow-sm overflow-hidden ${expanded ? 'border-blue-400 shadow-md' : 'border-gray-200'}`}>
+            <button onClick={() => setSelectedWorkshopId(expanded ? null : workshop.id)} className="w-full text-left p-6 hover:bg-gray-50 transition"><div className="flex items-start justify-between gap-3"><div><p className="text-xs font-semibold text-blue-600">ROOM WORKSHOP</p><h3 className="text-xl font-bold text-gray-900 mt-1">{workshop.title}</h3></div><span className="text-blue-600 text-sm font-medium">{expanded ? 'Collapse ↑' : 'Open ↓'}</span></div><p className="text-gray-600 text-sm mt-3 line-clamp-2">{workshop.description}</p><div className="mt-4 text-sm text-gray-500"><p>{formatDate(workshop.dateTime)} · {formatTime(workshop.dateTime)}</p><p className="mt-1">Host: {workshop.teacherName}</p></div></button>
+            {expanded && <div className="border-t px-6 py-6"><p className="text-gray-700 leading-relaxed">{workshop.description || 'No description provided.'}</p><div className="grid sm:grid-cols-2 gap-3 text-sm mt-5"><div className="bg-gray-50 rounded-lg p-4"><b>Date</b><p className="text-gray-600 mt-1">{formatDate(workshop.dateTime)}</p></div><div className="bg-gray-50 rounded-lg p-4"><b>Time</b><p className="text-gray-600 mt-1">{formatTime(workshop.dateTime)}</p></div><div className="bg-gray-50 rounded-lg p-4"><b>Location</b><p className="text-gray-600 mt-1">{workshop.location}</p></div><div className="bg-gray-50 rounded-lg p-4"><b>Capacity</b><p className="text-gray-600 mt-1">{workshop.capacity}</p></div></div><p className="text-sm text-blue-700 mt-4">Room: {workshop.roomName || activeRoom.name}</p>
+              {workshop.meetingUrl && workshop.location?.toLowerCase() === 'online' && <div className="mt-5 rounded-xl bg-blue-50 border border-blue-100 p-5"><p className="font-semibold text-blue-900">Online Workshop</p><p className="text-sm text-blue-700 mt-1">Use this link when the workshop starts.</p>{(application?.status === 'ACCEPTED' || workshop.teacherEmail === JSON.parse(localStorage.getItem('user') || '{}')?.email) && <a href={workshop.meetingUrl} target="_blank" rel="noreferrer" className="inline-block mt-3 bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium">Join Workshop</a>}</div>}
+              <div className="mt-6 flex flex-wrap gap-2">{application ? <span className="bg-gray-100 text-gray-700 px-4 py-2.5 rounded-lg text-sm font-medium">Application: {application.status}</span> : workshop.teacherEmail !== JSON.parse(localStorage.getItem('user') || '{}')?.email && <button onClick={() => handleApply(workshop.id)} disabled={applyingId === workshop.id} className="bg-green-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium disabled:opacity-50">{applyingId === workshop.id ? 'Applying...' : 'Apply to Workshop'}</button>}{workshop.teacherEmail === JSON.parse(localStorage.getItem('user') || '{}')?.email && <button onClick={() => navigate(`/workshops/${workshop.id}/applications`, { state: { returnTo: '/room' } })} className="bg-yellow-500 text-white px-4 py-2.5 rounded-lg text-sm font-medium">Manage Applications</button>}<button onClick={() => navigate(`/workshops/${workshop.id}/resources`, { state: { returnTo: '/room' } })} className="bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium">Learning Resources</button></div>
+            </div>}
+          </div>; })}</div>}
         </section>}
       </div>
     </div>
