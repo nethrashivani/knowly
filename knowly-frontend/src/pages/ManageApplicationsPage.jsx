@@ -4,7 +4,7 @@ import axios from 'axios';
 import { getToken } from '../services/authService';
 import Navbar from '../components/Navbar';
 
-const BASE_URL = 'http://https://knowly-lphd.onrender.com/api/workshop-applications';
+const BASE_URL = 'https://knowly-lphd.onrender.com/api/workshop-applications';
 
 export default function ManageApplicationsPage() {
   const { workshopId } = useParams();
