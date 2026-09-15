@@ -68,7 +68,7 @@ export default function Navbar() {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200 py-3 flex flex-col gap-1">
             {NAV_LINKS.map((link) => <button key={link.path} onClick={() => goTo(link.path)} className={`text-left px-2 py-2.5 rounded-lg text-sm font-medium transition ${link.match(location.pathname) ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'}`}>{link.label}</button>)}
-            <button onClick={() => goTo('/room')} className="text-left px-2 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-blue-600">Room</button>
+            <button onClick={() => goTo('/room')} className={`text-left px-2 py-2.5 rounded-lg text-sm font-semibold ${location.pathname === '/room' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'}`}>Room</button>
           </div>
         )}
       </div>
