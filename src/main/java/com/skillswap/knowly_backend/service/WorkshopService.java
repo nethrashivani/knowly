@@ -1,14 +1,19 @@
 package com.skillswap.knowly_backend.service;
 
 import com.skillswap.knowly_backend.dto.WorkshopDTO;
+import com.skillswap.knowly_backend.entity.ApplicationStatus;
 import com.skillswap.knowly_backend.entity.Room;
 import com.skillswap.knowly_backend.entity.User;
 import com.skillswap.knowly_backend.entity.Workshop;
+import com.skillswap.knowly_backend.entity.WorkshopApplication;
+import com.skillswap.knowly_backend.repository.RatingRepository;
 import com.skillswap.knowly_backend.repository.RoomMemberRepository;
 import com.skillswap.knowly_backend.repository.RoomRepository;
 import com.skillswap.knowly_backend.repository.UserRepository;
+import com.skillswap.knowly_backend.repository.WorkshopApplicationRepository;
 import com.skillswap.knowly_backend.repository.WorkshopRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,16 +21,27 @@ import java.util.List;
 public class WorkshopService {
 
     private final WorkshopRepository workshopRepository;
+    private final WorkshopApplicationRepository applicationRepository;
+    private final RatingRepository ratingRepository;
     private final UserRepository userRepository;
     private final RoomRepository roomRepository;
     private final RoomMemberRepository roomMemberRepository;
+    private final NotificationService notificationService;
 
-    public WorkshopService(WorkshopRepository workshopRepository, UserRepository userRepository,
-                           RoomRepository roomRepository, RoomMemberRepository roomMemberRepository) {
+    public WorkshopService(WorkshopRepository workshopRepository,
+                           WorkshopApplicationRepository applicationRepository,
+                           RatingRepository ratingRepository,
+                           UserRepository userRepository,
+                           RoomRepository roomRepository,
+                           RoomMemberRepository roomMemberRepository,
+                           NotificationService notificationService) {
         this.workshopRepository = workshopRepository;
+        this.applicationRepository = applicationRepository;
+        this.ratingRepository = ratingRepository;
         this.userRepository = userRepository;
         this.roomRepository = roomRepository;
         this.roomMemberRepository = roomMemberRepository;
+        this.notificationService = notificationService;
     }
 
     public WorkshopDTO createWorkshop(String email, WorkshopDTO dto) {
@@ -61,7 +77,10 @@ public class WorkshopService {
     }
 
     public List<WorkshopDTO> getAllWorkshops(String email) {
-        return workshopRepository.findByRoomIsNull().stream().map(this::convertToDTO).toList();
+        return workshopRepository.findByRoomIsNull().stream()
+                .filter(workshop -> !workshop.getTeacher().getEmail().equalsIgnoreCase(email))
+                .map(this::convertToDTO)
+                .toList();
     }
 
     public List<WorkshopDTO> getRoomWorkshops(Long roomId, String email) {
@@ -91,9 +110,27 @@ public class WorkshopService {
         return workshopRepository.findByTeacher_Id(teacherId).stream().map(this::convertToDTO).toList();
     }
 
+    @Transactional
     public void deleteWorkshop(Long id, String email) {
-        Workshop workshop = workshopRepository.findById(id).orElseThrow(() -> new RuntimeException("Workshop not found"));
-        if (!workshop.getTeacher().getEmail().equals(email)) throw new RuntimeException("You are not authorized to delete this workshop");
+        Workshop workshop = workshopRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Workshop not found"));
+
+        if (!workshop.getTeacher().getEmail().equals(email)) {
+            throw new RuntimeException("You are not authorized to delete this workshop");
+        }
+
+        List<WorkshopApplication> applications = applicationRepository.findByWorkshop_Id(id);
+        for (WorkshopApplication application : applications) {
+            if (application.getStatus() == ApplicationStatus.PENDING || application.getStatus() == ApplicationStatus.ACCEPTED) {
+                notificationService.createNotification(
+                        application.getLearner().getEmail(),
+                        "The workshop \"" + workshop.getTitle() + "\" has been deleted by the host."
+                );
+            }
+        }
+
+        ratingRepository.deleteByWorkshop_Id(id);
+        applicationRepository.deleteAll(applications);
         workshopRepository.delete(workshop);
     }
 
