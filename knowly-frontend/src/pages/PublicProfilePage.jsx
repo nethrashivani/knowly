@@ -62,6 +62,7 @@ function PublicProfilePage() {
   const formatDate = (value) => value ? new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'N/A';
   const formatTime = (value) => value ? new Date(value).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' }) : 'N/A';
   const averageRating = ratings.length ? (ratings.reduce((sum, item) => sum + Number(item.rating), 0) / ratings.length).toFixed(1) : null;
+  const featuredReviews = ratings.filter((item) => item.review && item.review.trim()).slice(0, 2);
 
   if (loading) return <div className="min-h-screen bg-gray-50"><Navbar /><div className="text-center py-24 text-gray-500">Loading profile...</div></div>;
   if (!profile) return <div className="min-h-screen bg-gray-50"><Navbar /><main className="max-w-4xl mx-auto px-4 py-10"><p className="text-red-600">{error || 'Profile not found.'}</p><button type="button" onClick={() => navigate(-1)} className="mt-4 text-blue-600">← Go back</button></main></div>;
@@ -79,6 +80,23 @@ function PublicProfilePage() {
           <div><p className="text-sm font-semibold text-blue-600 uppercase tracking-wide">Instructor Profile</p><h1 className="text-3xl font-bold text-gray-900 mt-1">{profile.name}</h1><p className="text-gray-500 mt-1">{profile.role}</p></div>
           {averageRating && <div className="bg-blue-50 rounded-xl px-5 py-3 text-center"><p className="text-2xl font-bold text-blue-700">{averageRating} / 5</p><p className="text-xs text-gray-500">{ratings.length} profile review{ratings.length === 1 ? '' : 's'}</p></div>}
         </div>
+
+        {featuredReviews.length > 0 && <div className="mt-6 pt-6 border-t border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-gray-900">What learners say</h2>
+            {ratings.length > featuredReviews.length && <span className="text-xs text-gray-400">Showing {featuredReviews.length} of {ratings.length}</span>}
+          </div>
+          <div className="space-y-3">
+            {featuredReviews.map((item) => <div key={item.id} className="bg-gray-50 rounded-xl px-4 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-semibold text-gray-900">{item.reviewerName}</p>
+                <span className="text-blue-600 font-semibold">{item.rating}/5</span>
+              </div>
+              <p className="text-gray-600 text-sm mt-1.5 leading-relaxed">“{item.review}”</p>
+            </div>)}
+          </div>
+        </div>}
+
         <div className="grid md:grid-cols-2 gap-5 mt-7"><div><h2 className="font-semibold text-gray-900">About</h2><p className="text-gray-600 mt-2 leading-relaxed">{profile.bio || 'No bio added yet.'}</p></div><div><h2 className="font-semibold text-gray-900">Skills wanted</h2><p className="text-gray-600 mt-2 leading-relaxed">{profile.skillsWanted || 'No skills added yet.'}</p></div></div>
         <p className="text-sm text-gray-500 mt-6">Contact: {profile.email}</p>
         {isOwnProfile && <p className="text-xs text-gray-400 mt-2">This is the public view of your profile. Editing is available from your Profile page.</p>}
