@@ -40,10 +40,12 @@ public class WorkshopApplicationService {
         if (workshop.getTeacher().getEmail().equals(learnerEmail)) throw new RuntimeException("You cannot apply to your own workshop");
         if (applicationRepository.findByWorkshop_IdAndLearner_Email(workshopId, learnerEmail).isPresent()) throw new RuntimeException("You have already applied to this workshop");
 
-        long acceptedCount = applicationRepository.findByWorkshop_Id(workshopId).stream()
-                .filter(application -> application.getStatus() == ApplicationStatus.ACCEPTED)
-                .count();
-        if (acceptedCount >= workshop.getCapacity()) throw new RuntimeException("Workshop is full");
+        if (workshop.isRequiresAcceptance()) {
+            long acceptedCount = applicationRepository.findByWorkshop_Id(workshopId).stream()
+                    .filter(application -> application.getStatus() == ApplicationStatus.ACCEPTED)
+                    .count();
+            if (acceptedCount >= workshop.getCapacity()) throw new RuntimeException("Workshop is full");
+        }
 
         ApplicationStatus initialStatus = workshop.isRequiresAcceptance()
                 ? ApplicationStatus.PENDING
@@ -57,13 +59,9 @@ public class WorkshopApplicationService {
                 .build());
 
         if (workshop.isRequiresAcceptance()) {
-            notificationService.createNotification(
-                    workshop.getTeacher().getEmail(),
-                    learner.getName() + " applied to your workshop: " + workshop.getTitle());
+            notificationService.createNotification(workshop.getTeacher().getEmail(), learner.getName() + " applied to your workshop: " + workshop.getTitle());
         } else {
-            notificationService.createNotification(
-                    learner.getEmail(),
-                    "You are enrolled in the workshop \"" + workshop.getTitle() + "\". No approval is required.");
+            notificationService.createNotification(learner.getEmail(), "You are enrolled in the workshop \"" + workshop.getTitle() + "\". No approval is required.");
         }
 
         return convertToDTO(saved);
@@ -91,9 +89,7 @@ public class WorkshopApplicationService {
             long acceptedCount = applicationRepository.findByWorkshop_Id(workshop.getId()).stream()
                     .filter(item -> item.getStatus() == ApplicationStatus.ACCEPTED)
                     .count();
-            if (acceptedCount >= workshop.getCapacity()) {
-                throw new RuntimeException("Workshop is full");
-            }
+            if (acceptedCount >= workshop.getCapacity()) throw new RuntimeException("Workshop is full");
         }
 
         application.setStatus(status);
@@ -109,8 +105,6 @@ public class WorkshopApplicationService {
             }
         } else if (status == ApplicationStatus.REJECTED) {
             notificationService.createNotification(learner.getEmail(), "Your application for the workshop \"" + workshop.getTitle() + "\" has been rejected.");
-        } else {
-            notificationService.createNotification(learner.getEmail(), "Your application for the workshop \"" + workshop.getTitle() + "\" is now pending.");
         }
         return convertToDTO(saved);
     }
