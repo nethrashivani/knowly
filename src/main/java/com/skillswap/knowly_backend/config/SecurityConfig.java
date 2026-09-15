@@ -38,6 +38,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
@@ -95,13 +96,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(
-        "http://localhost:5174",
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "https://knowly-phi.vercel.app",
-        "https://knowly-oit-main-nethh1.vercel.app"
-));
+        // Allow the deployed Knowly frontend and local development origins.
+        config.setAllowedOriginPatterns(List.of(
+                "https://*.vercel.app",
+                "http://localhost:[*]"
+        ));
 
         config.setAllowedMethods(List.of(
                 "GET",
@@ -113,11 +112,10 @@ public class SecurityConfig {
 
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
 
-        return new UrlBasedCorsConfigurationSource() {
-            {
-                registerCorsConfiguration("/**", config);
-            }
-        };
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }
