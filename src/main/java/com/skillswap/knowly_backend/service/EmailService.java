@@ -23,8 +23,8 @@ public class EmailService {
 
     public EmailService(
             ObjectMapper objectMapper,
-            @Value("${resend.api-key}") String resendApiKey,
-            @Value("${resend.from-email:onboarding@resend.dev}") String fromEmail
+            @Value("${RESEND_API_KEY}") String resendApiKey,
+            @Value("${RESEND_FROM_EMAIL:onboarding@resend.dev}") String fromEmail
     ) {
         this.objectMapper = objectMapper;
         this.httpClient = HttpClient.newHttpClient();
