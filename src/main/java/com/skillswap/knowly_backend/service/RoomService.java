@@ -24,15 +24,17 @@ public class RoomService {
     private final UserRepository userRepository;
     private final WorkshopRepository workshopRepository;
     private final NotificationService notificationService;
+    private final EmailService emailService;
 
     public RoomService(RoomRepository roomRepository, RoomMemberRepository roomMemberRepository,
                        UserRepository userRepository, WorkshopRepository workshopRepository,
-                       NotificationService notificationService) {
+                       NotificationService notificationService, EmailService emailService) {
         this.roomRepository = roomRepository;
         this.roomMemberRepository = roomMemberRepository;
         this.userRepository = userRepository;
         this.workshopRepository = workshopRepository;
         this.notificationService = notificationService;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -52,9 +54,24 @@ public class RoomService {
         if (code == null || code.isBlank()) throw new IllegalArgumentException("Room code is required");
         Room room = roomRepository.findByCodeIgnoreCase(code.trim())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid room code"));
-        addMembership(user, room);
+
+        boolean newlyJoined = addMembership(user, room);
         user.setRoom(room);
         userRepository.save(user);
+
+        if (newlyJoined && !room.getOwner().getId().equals(user.getId())) {
+            notificationService.createNotification(
+                    room.getOwner().getEmail(),
+                    user.getName() + " joined your room: " + room.getName());
+            sendEmailSafely(
+                    room.getOwner().getEmail(),
+                    "Someone joined your Knowly room",
+                    "Hi " + room.getOwner().getName() + ",\n\n"
+                            + user.getName() + " (" + user.getEmail() + ") joined your room \""
+                            + room.getName() + "\" using the room code.\n\n"
+                            + "Open Knowly to see your room members.\n\nRegards,\nKnowly");
+        }
+
         return toDTO(room, user, false);
     }
 
@@ -129,10 +146,12 @@ public class RoomService {
         }
     }
 
-    private void addMembership(User user, Room room) {
+    private boolean addMembership(User user, Room room) {
         if (!roomMemberRepository.existsByRoom_IdAndUser_Id(room.getId(), user.getId())) {
             roomMemberRepository.save(RoomMember.builder().room(room).user(user).build());
+            return true;
         }
+        return false;
     }
 
     private User findUser(String email) {
@@ -147,6 +166,14 @@ public class RoomService {
             code = value.toString();
         } while (roomRepository.existsByCode(code));
         return code;
+    }
+
+    private void sendEmailSafely(String to, String subject, String body) {
+        try {
+            emailService.sendEmail(to, subject, body);
+        } catch (Exception e) {
+            System.err.println("Failed to send Knowly email to " + to + ": " + e.getMessage());
+        }
     }
 
     private RoomDTO toDTO(Room room, User user, boolean includeCode) {
