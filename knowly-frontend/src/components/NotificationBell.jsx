@@ -14,13 +14,12 @@ export default function NotificationBell() {
 
     const loadNotifications = async () => {
         try {
-            // These requests are independent, so don't make one wait for the other.
             const [notificationsData, count] = await Promise.all([
                 getMyNotifications(),
                 getUnreadCount()
             ]);
-            setNotifications(notificationsData);
-            setUnreadCount(count);
+            setNotifications(Array.isArray(notificationsData) ? notificationsData : []);
+            setUnreadCount(Number(count) || 0);
         } catch (err) {
             console.error('Failed to load notifications:', err);
         }
@@ -42,6 +41,12 @@ export default function NotificationBell() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    const handleBellClick = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setOpen((prev) => !prev);
+    };
+
     const handleMarkAsRead = async (notificationId) => {
         if (markingId !== null) return;
 
@@ -61,7 +66,9 @@ export default function NotificationBell() {
         }
     };
 
-    const handleMarkAllAsRead = async () => {
+    const handleMarkAllAsRead = async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
         const unread = notifications.filter((notification) => !notification.read);
         if (unread.length === 0 || markingId !== null) return;
 
@@ -77,13 +84,15 @@ export default function NotificationBell() {
     };
 
     return (
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative" ref={dropdownRef} onClick={(event) => event.stopPropagation()}>
             <button
-                onClick={() => setOpen((prev) => !prev)}
+                type="button"
+                onClick={handleBellClick}
                 className="relative text-gray-600 hover:text-blue-600 text-xl px-2 transition"
                 title="Notifications"
                 aria-label="Notifications"
                 aria-expanded={open}
+                aria-haspopup="true"
             >
                 🔔
                 {unreadCount > 0 && (
@@ -94,11 +103,12 @@ export default function NotificationBell() {
             </button>
 
             {open && (
-                <div className="absolute right-0 mt-3 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-xl border border-gray-200 z-[60] overflow-hidden">
+                <div className="absolute right-0 mt-3 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-xl border border-gray-200 z-[100] overflow-hidden">
                     <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between gap-3">
                         <h3 className="font-bold text-gray-800">Notifications</h3>
                         {unreadCount > 0 && (
                             <button
+                                type="button"
                                 onClick={handleMarkAllAsRead}
                                 className="text-xs font-medium text-blue-600 hover:text-blue-800 whitespace-nowrap"
                             >
@@ -129,7 +139,11 @@ export default function NotificationBell() {
                                             </p>
                                             {!notification.read && (
                                                 <button
-                                                    onClick={() => handleMarkAsRead(notification.id)}
+                                                    type="button"
+                                                    onClick={(event) => {
+                                                        event.stopPropagation();
+                                                        handleMarkAsRead(notification.id);
+                                                    }}
                                                     disabled={markingId === notification.id}
                                                     className="mt-2 text-xs font-medium text-blue-600 hover:text-blue-800 disabled:opacity-50"
                                                 >
