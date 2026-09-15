@@ -96,12 +96,12 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(List.of(
-                "http://localhost:5174",
-                "http://localhost:5173",
-                "http://localhost:3000",
-                "https://knowly-ph.vercel.app",
-                "https://knowly-oit-main-nethh1.vercel.app"
-        ));
+        "http://localhost:5174",
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://knowly-phi.vercel.app",
+        "https://knowly-oit-main-nethh1.vercel.app"
+));a
 
         config.setAllowedMethods(List.of(
                 "GET",

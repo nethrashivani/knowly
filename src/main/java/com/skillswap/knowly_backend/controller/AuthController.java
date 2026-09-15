@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @CrossOrigin(origins = {
         "http://localhost:5173",
-        "https://knowly-ph.vercel.app",
+        "https://knowly-phi.vercel.app",
         "https://knowly-oit-main-nethh1.vercel.app"
 })
 @Tag(name = "Auth API", description = "Register and Login")
