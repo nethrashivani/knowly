@@ -32,7 +32,7 @@ public class Workshop {
     @Column(length = 1000)
     private String meetingUrl;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Integer capacity;
 
     @Column(nullable = false)
