@@ -1,13 +1,13 @@
 package com.skillswap.knowly_backend.service;
 
-import com.skillswap.skillswap_backend.config.JwtUtil;
-import com.skillswap.skillswap_backend.dto.AuthResponse;
-import com.skillswap.skillswap_backend.dto.LoginRequest;
-import com.skillswap.skillswap_backend.dto.RegisterRequest;
-import com.skillswap.skillswap_backend.entity.PendingRegistration;
-import com.skillswap.skillswap_backend.entity.User;
-import com.skillswap.skillswap_backend.repository.PendingRegistrationRepository;
-import com.skillswap.skillswap_backend.repository.UserRepository;
+import com.skillswap.knowly_backend.config.JwtUtil;
+import com.skillswap.knowly_backend.dto.AuthResponse;
+import com.skillswap.knowly_backend.dto.LoginRequest;
+import com.skillswap.knowly_backend.dto.RegisterRequest;
+import com.skillswap.knowly_backend.entity.PendingRegistration;
+import com.skillswap.knowly_backend.entity.User;
+import com.skillswap.knowly_backend.repository.PendingRegistrationRepository;
+import com.skillswap.knowly_backend.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;

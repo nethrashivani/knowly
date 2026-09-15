@@ -1,10 +1,10 @@
 package com.skillswap.knowly_backend.service;
 
-import com.skillswap.skillswap_backend.dto.UserProfileDTO;
-import com.skillswap.skillswap_backend.entity.User;
-import com.skillswap.skillswap_backend.entity.UserProfile;
-import com.skillswap.skillswap_backend.repository.UserProfileRepository;
-import com.skillswap.skillswap_backend.repository.UserRepository;
+import com.skillswap.knowly_backend.dto.UserProfileDTO;
+import com.skillswap.knowly_backend.entity.User;
+import com.skillswap.knowly_backend.entity.UserProfile;
+import com.skillswap.knowly_backend.repository.UserProfileRepository;
+import com.skillswap.knowly_backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 @Service

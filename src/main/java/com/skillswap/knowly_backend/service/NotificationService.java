@@ -1,9 +1,9 @@
 package com.skillswap.knowly_backend.service;
 
-import com.skillswap.skillswap_backend.entity.Notification;
-import com.skillswap.skillswap_backend.entity.User;
-import com.skillswap.skillswap_backend.repository.NotificationRepository;
-import com.skillswap.skillswap_backend.repository.UserRepository;
+import com.skillswap.knowly_backend.entity.Notification;
+import com.skillswap.knowly_backend.entity.User;
+import com.skillswap.knowly_backend.repository.NotificationRepository;
+import com.skillswap.knowly_backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

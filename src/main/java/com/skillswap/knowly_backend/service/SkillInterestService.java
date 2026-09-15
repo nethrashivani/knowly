@@ -1,11 +1,11 @@
 package com.skillswap.knowly_backend.service;
 
-import com.skillswap.skillswap_backend.entity.Skill;
-import com.skillswap.skillswap_backend.entity.SkillInterest;
-import com.skillswap.skillswap_backend.entity.User;
-import com.skillswap.skillswap_backend.repository.SkillInterestRepository;
-import com.skillswap.skillswap_backend.repository.SkillRepository;
-import com.skillswap.skillswap_backend.repository.UserRepository;
+import com.skillswap.knowly_backend.entity.Skill;
+import com.skillswap.knowly_backend.entity.SkillInterest;
+import com.skillswap.knowly_backend.entity.User;
+import com.skillswap.knowly_backend.repository.SkillInterestRepository;
+import com.skillswap.knowly_backend.repository.SkillRepository;
+import com.skillswap.knowly_backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

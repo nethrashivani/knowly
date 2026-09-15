@@ -1,7 +1,7 @@
 package com.skillswap.knowly_backend.controller;
 
-import com.skillswap.skillswap_backend.dto.WorkshopDTO;
-import com.skillswap.skillswap_backend.service.WorkshopService;
+import com.skillswap.knowly_backend.dto.WorkshopDTO;
+import com.skillswap.knowly_backend.service.WorkshopService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

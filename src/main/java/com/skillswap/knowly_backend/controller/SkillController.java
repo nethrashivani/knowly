@@ -1,7 +1,7 @@
 package com.skillswap.knowly_backend.controller;
 
-import com.skillswap.skillswap_backend.dto.SkillDTO;
-import com.skillswap.skillswap_backend.service.SkillService;
+import com.skillswap.knowly_backend.dto.SkillDTO;
+import com.skillswap.knowly_backend.service.SkillService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

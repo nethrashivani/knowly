@@ -1,6 +1,6 @@
 package com.skillswap.knowly_backend.config;
 
-import com.skillswap.skillswap_backend.repository.UserRepository;
+import com.skillswap.knowly_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

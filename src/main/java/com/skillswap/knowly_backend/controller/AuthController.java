@@ -1,12 +1,12 @@
 package com.skillswap.knowly_backend.controller;
 
-import com.skillswap.skillswap_backend.dto.AuthResponse;
-import com.skillswap.skillswap_backend.dto.LoginRequest;
-import com.skillswap.skillswap_backend.dto.RegisterRequest;
-import com.skillswap.skillswap_backend.dto.ResendOtpRequest;
-import com.skillswap.skillswap_backend.dto.VerifyOtpRequest;
-import com.skillswap.skillswap_backend.service.AuthService;
-import com.skillswap.skillswap_backend.service.OtpService;
+import com.skillswap.knowly_backend.dto.AuthResponse;
+import com.skillswap.knowly_backend.dto.LoginRequest;
+import com.skillswap.knowly_backend.dto.RegisterRequest;
+import com.skillswap.knowly_backend.dto.ResendOtpRequest;
+import com.skillswap.knowly_backend.dto.VerifyOtpRequest;
+import com.skillswap.knowly_backend.service.AuthService;
+import com.skillswap.knowly_backend.service.OtpService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

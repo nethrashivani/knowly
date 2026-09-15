@@ -1,6 +1,6 @@
 package com.skillswap.knowly_backend.repository;
 
-import com.skillswap.skillswap_backend.entity.SkillInterest;
+import com.skillswap.knowly_backend.entity.SkillInterest;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

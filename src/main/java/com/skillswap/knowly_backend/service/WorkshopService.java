@@ -1,10 +1,10 @@
 package com.skillswap.knowly_backend.service;
 
-import com.skillswap.skillswap_backend.dto.WorkshopDTO;
-import com.skillswap.skillswap_backend.entity.User;
-import com.skillswap.skillswap_backend.entity.Workshop;
-import com.skillswap.skillswap_backend.repository.UserRepository;
-import com.skillswap.skillswap_backend.repository.WorkshopRepository;
+import com.skillswap.knowly_backend.dto.WorkshopDTO;
+import com.skillswap.knowly_backend.entity.User;
+import com.skillswap.knowly_backend.entity.Workshop;
+import com.skillswap.knowly_backend.repository.UserRepository;
+import com.skillswap.knowly_backend.repository.WorkshopRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

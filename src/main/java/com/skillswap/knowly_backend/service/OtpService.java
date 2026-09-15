@@ -1,7 +1,7 @@
 package com.skillswap.knowly_backend.service;
 
-import com.skillswap.skillswap_backend.entity.EmailOtp;
-import com.skillswap.skillswap_backend.repository.EmailOtpRepository;
+import com.skillswap.knowly_backend.entity.EmailOtp;
+import com.skillswap.knowly_backend.repository.EmailOtpRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

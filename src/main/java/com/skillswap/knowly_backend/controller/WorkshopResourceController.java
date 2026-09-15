@@ -1,7 +1,7 @@
 package com.skillswap.knowly_backend.controller;
 
-import com.skillswap.skillswap_backend.entity.WorkshopResource;
-import com.skillswap.skillswap_backend.service.WorkshopResourceService;
+import com.skillswap.knowly_backend.entity.WorkshopResource;
+import com.skillswap.knowly_backend.service.WorkshopResourceService;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;

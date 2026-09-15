@@ -1,6 +1,6 @@
 package com.skillswap.knowly_backend.config;
 
-import com.skillswap.skillswap_backend.repository.UserRepository;
+import com.skillswap.knowly_backend.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

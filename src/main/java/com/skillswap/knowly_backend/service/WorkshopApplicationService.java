@@ -1,13 +1,13 @@
 package com.skillswap.knowly_backend.service;
 
-import com.skillswap.skillswap_backend.dto.WorkshopApplicationDTO;
-import com.skillswap.skillswap_backend.entity.ApplicationStatus;
-import com.skillswap.skillswap_backend.entity.User;
-import com.skillswap.skillswap_backend.entity.Workshop;
-import com.skillswap.skillswap_backend.entity.WorkshopApplication;
-import com.skillswap.skillswap_backend.repository.UserRepository;
-import com.skillswap.skillswap_backend.repository.WorkshopApplicationRepository;
-import com.skillswap.skillswap_backend.repository.WorkshopRepository;
+import com.skillswap.knowly_backend.dto.WorkshopApplicationDTO;
+import com.skillswap.knowly_backend.entity.ApplicationStatus;
+import com.skillswap.knowly_backend.entity.User;
+import com.skillswap.knowly_backend.entity.Workshop;
+import com.skillswap.knowly_backend.entity.WorkshopApplication;
+import com.skillswap.knowly_backend.repository.UserRepository;
+import com.skillswap.knowly_backend.repository.WorkshopApplicationRepository;
+import com.skillswap.knowly_backend.repository.WorkshopRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

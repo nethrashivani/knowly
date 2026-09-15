@@ -1,12 +1,12 @@
 package com.skillswap.knowly_backend.service;
 
-import com.skillswap.skillswap_backend.exception.ResourceNotFoundException;
-import com.skillswap.skillswap_backend.exception.UnauthorizedException;
-import com.skillswap.skillswap_backend.dto.SkillDTO;
-import com.skillswap.skillswap_backend.entity.Skill;
-import com.skillswap.skillswap_backend.entity.User;
-import com.skillswap.skillswap_backend.repository.SkillRepository;
-import com.skillswap.skillswap_backend.repository.UserRepository;
+import com.skillswap.knowly_backend.exception.ResourceNotFoundException;
+import com.skillswap.knowly_backend.exception.UnauthorizedException;
+import com.skillswap.knowly_backend.dto.SkillDTO;
+import com.skillswap.knowly_backend.entity.Skill;
+import com.skillswap.knowly_backend.entity.User;
+import com.skillswap.knowly_backend.repository.SkillRepository;
+import com.skillswap.knowly_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

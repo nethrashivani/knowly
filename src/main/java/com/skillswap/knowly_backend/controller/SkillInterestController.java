@@ -1,8 +1,8 @@
 package com.skillswap.knowly_backend.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import com.skillswap.skillswap_backend.entity.SkillInterest;
-import com.skillswap.skillswap_backend.service.SkillInterestService;
+import com.skillswap.knowly_backend.entity.SkillInterest;
+import com.skillswap.knowly_backend.service.SkillInterestService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;

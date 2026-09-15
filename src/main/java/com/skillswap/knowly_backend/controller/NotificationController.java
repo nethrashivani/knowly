@@ -1,7 +1,7 @@
 package com.skillswap.knowly_backend.controller;
 
-import com.skillswap.skillswap_backend.entity.Notification;
-import com.skillswap.skillswap_backend.service.NotificationService;
+import com.skillswap.knowly_backend.entity.Notification;
+import com.skillswap.knowly_backend.service.NotificationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;

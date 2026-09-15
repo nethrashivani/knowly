@@ -1,8 +1,8 @@
 package com.skillswap.knowly_backend.controller;
 
-import com.skillswap.skillswap_backend.dto.WorkshopApplicationDTO;
-import com.skillswap.skillswap_backend.entity.ApplicationStatus;
-import com.skillswap.skillswap_backend.service.WorkshopApplicationService;
+import com.skillswap.knowly_backend.dto.WorkshopApplicationDTO;
+import com.skillswap.knowly_backend.entity.ApplicationStatus;
+import com.skillswap.knowly_backend.service.WorkshopApplicationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;

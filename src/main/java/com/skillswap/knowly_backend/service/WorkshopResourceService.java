@@ -1,13 +1,13 @@
 package com.skillswap.knowly_backend.service;
 
-import com.skillswap.skillswap_backend.entity.ApplicationStatus;
-import com.skillswap.skillswap_backend.entity.User;
-import com.skillswap.skillswap_backend.entity.Workshop;
-import com.skillswap.skillswap_backend.entity.WorkshopApplication;
-import com.skillswap.skillswap_backend.entity.WorkshopResource;
-import com.skillswap.skillswap_backend.repository.WorkshopApplicationRepository;
-import com.skillswap.skillswap_backend.repository.WorkshopRepository;
-import com.skillswap.skillswap_backend.repository.WorkshopResourceRepository;
+import com.skillswap.knowly_backend.entity.ApplicationStatus;
+import com.skillswap.knowly_backend.entity.User;
+import com.skillswap.knowly_backend.entity.Workshop;
+import com.skillswap.knowly_backend.entity.WorkshopApplication;
+import com.skillswap.knowly_backend.entity.WorkshopResource;
+import com.skillswap.knowly_backend.repository.WorkshopApplicationRepository;
+import com.skillswap.knowly_backend.repository.WorkshopRepository;
+import com.skillswap.knowly_backend.repository.WorkshopResourceRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

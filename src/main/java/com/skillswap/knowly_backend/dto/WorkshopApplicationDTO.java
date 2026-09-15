@@ -1,6 +1,6 @@
 package com.skillswap.knowly_backend.dto;
 
-import com.skillswap.skillswap_backend.entity.ApplicationStatus;
+import com.skillswap.knowly_backend.entity.ApplicationStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;

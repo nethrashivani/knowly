@@ -1,6 +1,6 @@
 package com.skillswap.knowly_backend.dto;
 
-import com.skillswap.skillswap_backend.entity.User;
+import com.skillswap.knowly_backend.entity.User;
 import lombok.*;
 
 @Data

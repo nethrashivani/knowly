@@ -1,7 +1,7 @@
 package com.skillswap.knowly_backend.controller;
 
-import com.skillswap.skillswap_backend.dto.UserProfileDTO;
-import com.skillswap.skillswap_backend.service.UserProfileService;
+import com.skillswap.knowly_backend.dto.UserProfileDTO;
+import com.skillswap.knowly_backend.service.UserProfileService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
