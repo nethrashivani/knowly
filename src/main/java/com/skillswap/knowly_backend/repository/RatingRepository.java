@@ -7,12 +7,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RatingRepository extends JpaRepository<Rating, Long> {
-
     List<Rating> findByRatedUser_Id(Long userId);
-
     List<Rating> findByWorkshop_IdOrderByCreatedAtDesc(Long workshopId);
-
     Optional<Rating> findByReviewer_IdAndWorkshop_Id(Long reviewerId, Long workshopId);
-
     boolean existsByReviewer_IdAndWorkshop_Id(Long reviewerId, Long workshopId);
+    void deleteByWorkshop_Id(Long workshopId);
 }
