@@ -29,6 +29,9 @@ public class WorkshopService {
         if (activeRoom == null) {
             throw new IllegalArgumentException("Join or create a room before creating a workshop");
         }
+        if (dto.isRequiresAcceptance() && (dto.getCapacity() == null || dto.getCapacity() < 1)) {
+            throw new IllegalArgumentException("Capacity is required for workshops with manual acceptance");
+        }
 
         Workshop workshop = Workshop.builder()
                 .title(dto.getTitle())
@@ -36,7 +39,7 @@ public class WorkshopService {
                 .dateTime(dto.getDateTime())
                 .location(dto.getLocation())
                 .meetingUrl(dto.getMeetingUrl())
-                .capacity(dto.getCapacity())
+                .capacity(dto.isRequiresAcceptance() ? dto.getCapacity() : 0)
                 .requiresAcceptance(dto.isRequiresAcceptance())
                 .room(activeRoom)
                 .teacher(teacher)
@@ -95,7 +98,7 @@ public class WorkshopService {
                 .dateTime(workshop.getDateTime())
                 .location(workshop.getLocation())
                 .meetingUrl(workshop.getMeetingUrl())
-                .capacity(workshop.getCapacity())
+                .capacity(workshop.isRequiresAcceptance() ? workshop.getCapacity() : null)
                 .requiresAcceptance(workshop.isRequiresAcceptance())
                 .teacherId(workshop.getTeacher().getId())
                 .teacherName(workshop.getTeacher().getName())
