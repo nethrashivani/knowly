@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getToken } from './authService';
 
-const BASE_URL = 'http://https://knowly-lphd.onrender.com/api/workshops';
+const BASE_URL = 'https://knowly-lphd.onrender.com/api/workshops';
 
 const authHeaders = () => ({
   headers: {
@@ -15,10 +15,7 @@ export const getAllWorkshops = async () => {
 };
 
 export const getWorkshopById = async (workshopId) => {
-  const response = await axios.get(
-    `${BASE_URL}/${workshopId}`
-  );
-
+  const response = await axios.get(`${BASE_URL}/${workshopId}`);
   return response.data;
 };
 
@@ -28,11 +25,7 @@ export const getMyWorkshops = async () => {
 };
 
 export const createWorkshop = async (workshopData) => {
-  const response = await axios.post(
-    BASE_URL,
-    workshopData,
-    authHeaders()
-  );
+  const response = await axios.post(BASE_URL, workshopData, authHeaders());
   return response.data;
 };
 
@@ -42,13 +35,10 @@ export const deleteWorkshop = async (id) => {
 
 export const applyForWorkshop = async (workshopId) => {
   const response = await axios.post(
-    `http://https://knowly-lphd.onrender.com/api/workshop-applications/workshop/${workshopId}`,
+    `https://knowly-lphd.onrender.com/api/workshop-applications/workshop/${workshopId}`,
     {},
     authHeaders()
   );
-
-
-  
 
   return response.data;
 };
