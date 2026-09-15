@@ -1,276 +1,187 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { createRoom, getMyRoom, joinRoom, leaveRoom } from '../services/roomService';
+import { createRoom, getMyRooms, joinRoom, leaveRoom, switchRoom } from '../services/roomService';
 
 export default function RoomPage() {
   const navigate = useNavigate();
-  const [room, setRoom] = useState(null);
+  const [rooms, setRooms] = useState([]);
   const [roomName, setRoomName] = useState('');
   const [code, setCode] = useState('');
+  const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
-  const loadRoom = async () => {
+  const loadRooms = async () => {
     try {
       setLoading(true);
       setError('');
-      setRoom(await getMyRoom());
+      setRooms(await getMyRooms());
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load room.');
+      setError(err.response?.data?.message || 'Failed to load your rooms.');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadRoom();
-  }, []);
+  useEffect(() => { loadRooms(); }, []);
 
   const handleCreate = async (e) => {
     e.preventDefault();
     if (!roomName.trim()) return;
-
     try {
-      setSaving(true);
-      setError('');
-      setMessage('');
-      setRoom(await createRoom(roomName.trim()));
-      setRoomName('');
-      setShowJoin(false);
-      setMessage('Room created successfully. Share the code with your employees.');
+      setSaving(true); setError(''); setMessage('');
+      const created = await createRoom(roomName.trim());
+      setRoomName(''); setShowCreate(false);
+      setMessage(`Room "${created.name}" created. You are now inside it.`);
+      await loadRooms();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create room.');
-    } finally {
-      setSaving(false);
-    }
+    } finally { setSaving(false); }
   };
 
   const handleJoin = async (e) => {
     e.preventDefault();
     if (!code.trim()) return;
-
     try {
-      setSaving(true);
-      setError('');
-      setMessage('');
-      setRoom(await joinRoom(code.trim().toUpperCase()));
-      setCode('');
-      setShowJoin(false);
-      setMessage('You joined the room. Workshops will now be scoped to this room.');
+      setSaving(true); setError(''); setMessage('');
+      const joined = await joinRoom(code.trim().toUpperCase());
+      setCode(''); setShowJoin(false);
+      setMessage(`You joined "${joined.name}". It is now your active room.`);
+      await loadRooms();
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid room code.');
-    } finally {
-      setSaving(false);
-    }
+    } finally { setSaving(false); }
   };
 
-  const handleCopy = async () => {
+  const handleSwitch = async (roomId, roomNameToSwitch) => {
+    try {
+      setSaving(true); setError(''); setMessage('');
+      await switchRoom(roomId);
+      setMessage(`Switched to "${roomNameToSwitch}". Workshops now show this room.`);
+      await loadRooms();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to switch rooms.');
+    } finally { setSaving(false); }
+  };
+
+  const handleLeave = async (room) => {
+    if (!window.confirm(`Leave ${room.name}? You can rejoin later with its code.`)) return;
+    try {
+      setSaving(true); setError(''); setMessage('');
+      await leaveRoom(room.id);
+      setMessage(`You left "${room.name}".`);
+      await loadRooms();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to leave room.');
+    } finally { setSaving(false); }
+  };
+
+  const handleCopy = async (room) => {
+    if (!room.code) return;
     try {
       await navigator.clipboard.writeText(room.code);
       setMessage('Room code copied to your clipboard.');
       setError('');
-    } catch (err) {
-      setMessage(`Copy failed. Your room code is ${room.code}`);
+    } catch {
+      setError('Could not copy automatically. Please copy the code manually.');
     }
   };
 
-  const handleLeave = async () => {
-    if (!window.confirm(`Leave ${room?.name}?`)) return;
+  if (loading) return <><Navbar /><div className="min-h-screen bg-gray-50 p-8 text-center text-gray-500">Loading your rooms...</div></>;
 
-    try {
-      setSaving(true);
-      setError('');
-      setMessage('');
-      await leaveRoom();
-      setRoom(null);
-      setShowJoin(false);
-      setMessage('You left the room. You can now create or join another room.');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to leave room.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const openJoinForm = () => {
-    setShowJoin(true);
-    setError('');
-    setMessage('');
-  };
-
-  if (loading) {
-    return (
-      <>
-        <Navbar />
-        <div className="min-h-screen bg-gray-50 p-8 text-center text-gray-500">
-          Loading room...
-        </div>
-      </>
-    );
-  }
+  const activeRoom = rooms.find((room) => room.active);
 
   return (
     <>
       <Navbar />
-
       <div className="min-h-screen bg-gray-50 px-4 py-8">
-        <div className="max-w-3xl mx-auto">
-          <button
-            onClick={() => navigate('/')}
-            className="text-blue-600 hover:text-blue-800 font-medium mb-6"
-          >
-            ← Back to Home
-          </button>
+        <div className="max-w-5xl mx-auto">
+          <button onClick={() => navigate('/')} className="text-blue-600 hover:text-blue-800 font-medium mb-6">← Back to Home</button>
 
           <div className="mb-8">
             <p className="text-blue-600 font-semibold">PRIVATE LEARNING SPACE</p>
-            <h1 className="text-3xl font-bold text-gray-900 mt-1">Your Room</h1>
-            <p className="text-gray-600 mt-2">
-              Create or join an organization room. Workshops created inside a room are visible only to its members.
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900 mt-1">Your Rooms</h1>
+            <p className="text-gray-600 mt-2">Join multiple organization rooms and switch between them. Each room has its own workshops and learning space.</p>
           </div>
 
-          {error && (
-            <div className="bg-red-100 text-red-700 px-4 py-3 rounded-xl mb-5">
-              {error}
-            </div>
-          )}
+          {error && <div className="bg-red-100 text-red-700 px-4 py-3 rounded-xl mb-5">{error}</div>}
+          {message && <div className="bg-green-100 text-green-700 px-4 py-3 rounded-xl mb-5">{message}</div>}
 
-          {message && (
-            <div className="bg-green-100 text-green-700 px-4 py-3 rounded-xl mb-5">
-              {message}
-            </div>
-          )}
+          <div className="flex flex-wrap gap-3 mb-6">
+            <button onClick={() => { setShowCreate(true); setShowJoin(false); setError(''); }} className="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-blue-700">+ Create a Room</button>
+            <button onClick={() => { setShowJoin(true); setShowCreate(false); setError(''); }} className="bg-gray-900 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-black">Join a Room</button>
+            {activeRoom && <button onClick={() => navigate('/workshops/create')} className="border border-blue-200 bg-white text-blue-600 px-5 py-2.5 rounded-lg font-medium hover:bg-blue-50">+ Create Workshop in {activeRoom.name}</button>}
+          </div>
 
-          {room ? (
-            <>
-              <div className="bg-white rounded-2xl shadow p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
-                  <div>
-                    <p className="text-sm text-gray-500">Current room</p>
-                    <h2 className="text-2xl font-bold text-gray-900">{room.name}</h2>
-                    <p className="text-sm text-gray-500 mt-1">Created by {room.ownerName}</p>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={openJoinForm}
-                      disabled={saving}
-                      className="border border-blue-200 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 disabled:opacity-50"
-                    >
-                      Join Another Room
-                    </button>
-                    <button
-                      onClick={handleLeave}
-                      disabled={saving}
-                      className="border border-red-200 text-red-600 px-4 py-2 rounded-lg hover:bg-red-50 disabled:opacity-50"
-                    >
-                      Leave Room
-                    </button>
-                  </div>
+          {(showCreate || showJoin) && (
+            <div className="bg-white rounded-2xl shadow p-6 mb-6">
+              <div className="flex items-start justify-between gap-4 mb-5">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">{showCreate ? 'Create a Room' : 'Join a Room'}</h2>
+                  <p className="text-sm text-gray-500 mt-1">{showCreate ? 'Create a private learning space for your organization or team.' : 'Enter the invitation code shared by the room owner.'}</p>
                 </div>
-
-                <div className="mt-7 rounded-xl bg-blue-50 border border-blue-100 p-5 text-center">
-                  <p className="text-sm text-blue-700 font-medium">Share this room code</p>
-                  <div className="text-3xl font-mono font-bold tracking-widest text-blue-800 mt-2">
-                    {room.code}
-                  </div>
-                  <button
-                    onClick={handleCopy}
-                    className="mt-4 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
-                  >
-                    Copy Code
-                  </button>
-                  <p className="text-xs text-blue-600 mt-2">
-                    Employees can enter this code from the Room page.
-                  </p>
-                </div>
+                <button onClick={() => { setShowCreate(false); setShowJoin(false); }} className="text-gray-500 hover:text-gray-800 text-xl">×</button>
               </div>
 
-              {showJoin && (
-                <form onSubmit={handleJoin} className="bg-white rounded-2xl shadow p-6 mt-6">
-                  <div className="flex items-start justify-between gap-4 mb-5">
-                    <div>
-                      <h2 className="text-xl font-bold text-gray-900">Join Another Room</h2>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Enter the code shared by another organization.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setShowJoin(false)}
-                      className="text-gray-500 hover:text-gray-800 text-xl"
-                      aria-label="Close join form"
-                    >
-                      ×
-                    </button>
-                  </div>
-
-                  <input
-                    value={code}
-                    onChange={(e) => setCode(e.target.value.toUpperCase())}
-                    placeholder="e.g. KN-X7K29A"
-                    maxLength={9}
-                    required
-                    autoFocus
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 font-mono tracking-wider"
-                  />
-
-                  <button
-                    disabled={saving}
-                    className="w-full mt-4 bg-gray-900 text-white py-3 rounded-lg hover:bg-black disabled:opacity-50"
-                  >
-                    {saving ? 'Joining...' : 'Join Room'}
-                  </button>
-
-                  <p className="text-xs text-gray-500 mt-3">
-                    Joining another room will switch your current room membership.
-                  </p>
+              {showCreate ? (
+                <form onSubmit={handleCreate} className="flex flex-col sm:flex-row gap-3">
+                  <input value={roomName} onChange={(e) => setRoomName(e.target.value)} placeholder="e.g. Capgemini IT" required className="flex-1 border border-gray-300 rounded-lg px-4 py-3" autoFocus />
+                  <button disabled={saving} className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50">{saving ? 'Creating...' : 'Create Room'}</button>
+                </form>
+              ) : (
+                <form onSubmit={handleJoin} className="flex flex-col sm:flex-row gap-3">
+                  <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="e.g. KN-X7K29A" maxLength={9} required className="flex-1 border border-gray-300 rounded-lg px-4 py-3 font-mono tracking-wider" autoFocus />
+                  <button disabled={saving} className="bg-gray-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-black disabled:opacity-50">{saving ? 'Joining...' : 'Join Room'}</button>
                 </form>
               )}
-            </>
+            </div>
+          )}
+
+          {rooms.length === 0 ? (
+            <div className="bg-white rounded-2xl shadow p-10 text-center">
+              <h2 className="text-xl font-bold text-gray-900">You are not in any rooms yet</h2>
+              <p className="text-gray-500 mt-2">Create your organization's room or join one using an invitation code.</p>
+            </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-6">
-              <form onSubmit={handleCreate} className="bg-white rounded-2xl shadow p-6">
-                <h2 className="text-xl font-bold text-gray-900">Create a Room</h2>
-                <p className="text-sm text-gray-500 mt-1 mb-5">For example: Capgemini IT</p>
-                <input
-                  value={roomName}
-                  onChange={(e) => setRoomName(e.target.value)}
-                  placeholder="Organization / team name"
-                  required
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3"
-                />
-                <button
-                  disabled={saving}
-                  className="w-full mt-4 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {saving ? 'Creating...' : 'Create Room'}
-                </button>
-              </form>
+              {rooms.map((room) => (
+                <div key={room.id} className={`bg-white rounded-2xl shadow p-6 border-2 ${room.active ? 'border-blue-500' : 'border-transparent'}`}>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      {room.active && <span className="inline-block text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full mb-2">ACTIVE ROOM</span>}
+                      <h2 className="text-xl font-bold text-gray-900">{room.name}</h2>
+                      <p className="text-sm text-gray-500 mt-1">Created by {room.ownerName}</p>
+                    </div>
+                    {room.active && <span className="text-green-600 text-sm font-semibold">● Active</span>}
+                  </div>
 
-              <form onSubmit={handleJoin} className="bg-white rounded-2xl shadow p-6">
-                <h2 className="text-xl font-bold text-gray-900">Join a Room</h2>
-                <p className="text-sm text-gray-500 mt-1 mb-5">Enter the code shared by your organization.</p>
-                <input
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.toUpperCase())}
-                  placeholder="e.g. KN-X7K29A"
-                  maxLength={9}
-                  required
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 font-mono tracking-wider"
-                />
-                <button
-                  disabled={saving}
-                  className="w-full mt-4 bg-gray-900 text-white py-3 rounded-lg hover:bg-black disabled:opacity-50"
-                >
-                  {saving ? 'Joining...' : 'Join Room'}
-                </button>
-              </form>
+                  {room.owner ? (
+                    <div className="mt-5 rounded-xl bg-blue-50 border border-blue-100 p-4">
+                      <p className="text-xs text-blue-700 font-semibold">OWNER INVITATION CODE</p>
+                      <div className="flex items-center justify-between gap-3 mt-1">
+                        <span className="text-2xl font-mono font-bold tracking-widest text-blue-800">{room.code}</span>
+                        <button onClick={() => handleCopy(room)} className="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">Copy</button>
+                      </div>
+                      <p className="text-xs text-blue-600 mt-2">Only you can see this code. Share it privately with your employees.</p>
+                    </div>
+                  ) : (
+                    <div className="mt-5 rounded-xl bg-gray-50 border border-gray-200 p-4">
+                      <p className="text-sm text-gray-600">You are a member of this organization room.</p>
+                      <p className="text-xs text-gray-500 mt-1">The invitation code is only visible to the room owner.</p>
+                    </div>
+                  )}
+
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {!room.active && <button disabled={saving} onClick={() => handleSwitch(room.id, room.name)} className="flex-1 min-w-[140px] bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">Enter Room</button>}
+                    {room.active && <button onClick={() => navigate('/workshops')} className="flex-1 min-w-[140px] bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700">View Workshops</button>}
+                    <button disabled={saving} onClick={() => handleLeave(room)} className="border border-red-200 text-red-600 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-red-50 disabled:opacity-50">Leave</button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
