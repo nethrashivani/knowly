@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { getToken } from './authService';
 
-const BASE_URL =
-  'http://https://knowly-lphd.onrender.com/api/workshop-applications';
+const BASE_URL = 'https://knowly-lphd.onrender.com/api/workshop-applications';
 
 const authHeaders = () => ({
   headers: {
@@ -11,10 +10,6 @@ const authHeaders = () => ({
 });
 
 export const getMyApplications = async () => {
-  const response = await axios.get(
-    `${BASE_URL}/my`,
-    authHeaders()
-  );
-
+  const response = await axios.get(`${BASE_URL}/my`, authHeaders());
   return response.data;
 };
