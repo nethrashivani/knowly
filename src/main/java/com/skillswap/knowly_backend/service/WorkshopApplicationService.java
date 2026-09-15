@@ -22,13 +22,7 @@ public class WorkshopApplicationService {
     private final NotificationService notificationService;
     private final EmailService emailService;
 
-    public WorkshopApplicationService(
-            WorkshopApplicationRepository applicationRepository,
-            WorkshopRepository workshopRepository,
-            UserRepository userRepository,
-            NotificationService notificationService,
-            EmailService emailService) {
-
+    public WorkshopApplicationService(WorkshopApplicationRepository applicationRepository, WorkshopRepository workshopRepository, UserRepository userRepository, NotificationService notificationService, EmailService emailService) {
         this.applicationRepository = applicationRepository;
         this.workshopRepository = workshopRepository;
         this.userRepository = userRepository;
@@ -36,167 +30,64 @@ public class WorkshopApplicationService {
         this.emailService = emailService;
     }
 
-    public WorkshopApplicationDTO applyForWorkshop(
-            Long workshopId,
-            String learnerEmail) {
+    public WorkshopApplicationDTO applyForWorkshop(Long workshopId, String learnerEmail) {
+        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RuntimeException("Workshop not found"));
+        User learner = userRepository.findByEmail(learnerEmail).orElseThrow(() -> new RuntimeException("User not found"));
 
-        Workshop workshop = workshopRepository.findById(workshopId)
-                .orElseThrow(() -> new RuntimeException("Workshop not found"));
-
-        User learner = userRepository.findByEmail(learnerEmail)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (workshop.getTeacher().getEmail().equals(learnerEmail)) {
-            throw new RuntimeException("You cannot apply to your own workshop");
+        if (workshop.getRoom() != null && (learner.getRoom() == null || !workshop.getRoom().getId().equals(learner.getRoom().getId()))) {
+            throw new RuntimeException("You must be a member of this workshop's room");
         }
+        if (workshop.getTeacher().getEmail().equals(learnerEmail)) throw new RuntimeException("You cannot apply to your own workshop");
+        if (applicationRepository.findByWorkshop_IdAndLearner_Email(workshopId, learnerEmail).isPresent()) throw new RuntimeException("You have already applied to this workshop");
 
-        if (applicationRepository
-                .findByWorkshop_IdAndLearner_Email(workshopId, learnerEmail)
-                .isPresent()) {
-            throw new RuntimeException("You have already applied to this workshop");
-        }
+        long acceptedCount = applicationRepository.findByWorkshop_Id(workshopId).stream().filter(application -> application.getStatus() == ApplicationStatus.ACCEPTED).count();
+        if (acceptedCount >= workshop.getCapacity()) throw new RuntimeException("Workshop is full");
 
-        long acceptedCount = applicationRepository
-                .findByWorkshop_Id(workshopId)
-                .stream()
-                .filter(application -> application.getStatus() == ApplicationStatus.ACCEPTED)
-                .count();
-
-        if (acceptedCount >= workshop.getCapacity()) {
-            throw new RuntimeException("Workshop is full");
-        }
-
-        WorkshopApplication application = WorkshopApplication.builder()
-                .workshop(workshop)
-                .learner(learner)
-                .status(ApplicationStatus.PENDING)
-                .appliedAt(LocalDateTime.now())
-                .build();
-
-        WorkshopApplication saved = applicationRepository.save(application);
-
-        notificationService.createNotification(
-                workshop.getTeacher().getEmail(),
-                learner.getName() + " applied to your workshop: " + workshop.getTitle()
-        );
-
+        WorkshopApplication saved = applicationRepository.save(WorkshopApplication.builder().workshop(workshop).learner(learner).status(ApplicationStatus.PENDING).appliedAt(LocalDateTime.now()).build());
+        notificationService.createNotification(workshop.getTeacher().getEmail(), learner.getName() + " applied to your workshop: " + workshop.getTitle());
         return convertToDTO(saved);
     }
 
     public List<WorkshopApplicationDTO> getMyApplications(String learnerEmail) {
-        return applicationRepository
-                .findByLearner_Email(learnerEmail)
-                .stream()
-                .map(this::convertToDTO)
-                .toList();
+        return applicationRepository.findByLearner_Email(learnerEmail).stream().map(this::convertToDTO).toList();
     }
 
-    public List<WorkshopApplicationDTO> getWorkshopApplications(
-            Long workshopId,
-            String teacherEmail) {
-
-        Workshop workshop = workshopRepository.findById(workshopId)
-                .orElseThrow(() -> new RuntimeException("Workshop not found"));
-
-        if (!workshop.getTeacher().getEmail().equals(teacherEmail)) {
-            throw new RuntimeException("You are not authorized to view these applications");
-        }
-
-        return applicationRepository
-                .findByWorkshop_Id(workshopId)
-                .stream()
-                .map(this::convertToDTO)
-                .toList();
+    public List<WorkshopApplicationDTO> getWorkshopApplications(Long workshopId, String teacherEmail) {
+        Workshop workshop = workshopRepository.findById(workshopId).orElseThrow(() -> new RuntimeException("Workshop not found"));
+        if (!workshop.getTeacher().getEmail().equals(teacherEmail)) throw new RuntimeException("You are not authorized to view these applications");
+        return applicationRepository.findByWorkshop_Id(workshopId).stream().map(this::convertToDTO).toList();
     }
 
-    public WorkshopApplicationDTO updateApplicationStatus(
-            Long applicationId,
-            ApplicationStatus status,
-            String teacherEmail) {
-
-        WorkshopApplication application = applicationRepository
-                .findById(applicationId)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
-
+    public WorkshopApplicationDTO updateApplicationStatus(Long applicationId, ApplicationStatus status, String teacherEmail) {
+        WorkshopApplication application = applicationRepository.findById(applicationId).orElseThrow(() -> new RuntimeException("Application not found"));
         Workshop workshop = application.getWorkshop();
         User learner = application.getLearner();
-
-        if (!workshop.getTeacher().getEmail().equals(teacherEmail)) {
-            throw new RuntimeException("You are not authorized to update this application");
-        }
-
-        // Status updates are idempotent. Once an application has been decided,
-        // repeating the same request must not create duplicate notifications/emails.
-        if (application.getStatus() != ApplicationStatus.PENDING) {
-            return convertToDTO(application);
-        }
+        if (!workshop.getTeacher().getEmail().equals(teacherEmail)) throw new RuntimeException("You are not authorized to update this application");
+        if (application.getStatus() != ApplicationStatus.PENDING) return convertToDTO(application);
 
         application.setStatus(status);
-
         WorkshopApplication saved = applicationRepository.save(application);
 
         if (status == ApplicationStatus.ACCEPTED) {
-            String message = "Your application for the workshop \""
-                    + workshop.getTitle()
-                    + "\" has been accepted.";
-
-            notificationService.createNotification(
-                    learner.getEmail(),
-                    message
-            );
-
-            // Email is intentionally best-effort. Render's free environment may
-            // block SMTP, so a mail failure must never delay or undo the decision.
+            notificationService.createNotification(learner.getEmail(), "Your application for the workshop \"" + workshop.getTitle() + "\" has been accepted.");
+            // Do not make the HTTP status update wait for SMTP on Render/free hosting.
             try {
-                String emailSubject = "Your Knowly workshop application was accepted";
-                String emailBody = "Hi " + learner.getName() + ",\n\n"
-                        + "Good news! Your application for the workshop \""
-                        + workshop.getTitle()
-                        + "\" has been accepted.\n\n"
-                        + "Workshop details:\n"
-                        + "Workshop: " + workshop.getTitle() + "\n"
-                        + "Date & Time: " + workshop.getDateTime() + "\n"
-                        + "Location: " + workshop.getLocation() + "\n\n"
-                        + "You can now attend this workshop.\n\n"
-                        + "Regards,\nKnowly";
-
-                emailService.sendEmail(
-                        learner.getEmail(),
-                        emailSubject,
-                        emailBody
-                );
+                String body = "Hi " + learner.getName() + ",\n\nGood news! Your application for the workshop \"" + workshop.getTitle() + "\" has been accepted.\n\nWorkshop details:\nWorkshop: " + workshop.getTitle() + "\nDate & Time: " + workshop.getDateTime() + "\nLocation: " + workshop.getLocation() + "\n\nRegards,\nKnowly";
+                emailService.sendEmail(learner.getEmail(), "Your Knowly workshop application was accepted", body);
             } catch (Exception e) {
-                System.err.println(
-                        "Failed to send acceptance email to "
-                                + learner.getEmail()
-                                + ": " + e.getMessage()
-                );
+                System.err.println("Failed to send acceptance email to " + learner.getEmail() + ": " + e.getMessage());
             }
-
         } else if (status == ApplicationStatus.REJECTED) {
-            notificationService.createNotification(
-                    learner.getEmail(),
-                    "Your application for the workshop \""
-                            + workshop.getTitle()
-                            + "\" has been rejected."
-            );
+            notificationService.createNotification(learner.getEmail(), "Your application for the workshop \"" + workshop.getTitle() + "\" has been rejected.");
         } else {
-            notificationService.createNotification(
-                    learner.getEmail(),
-                    "Your application for the workshop \""
-                            + workshop.getTitle()
-                            + "\" is now pending."
-            );
+            notificationService.createNotification(learner.getEmail(), "Your application for the workshop \"" + workshop.getTitle() + "\" is now pending.");
         }
-
         return convertToDTO(saved);
     }
 
     private WorkshopApplicationDTO convertToDTO(WorkshopApplication application) {
-
         Workshop workshop = application.getWorkshop();
         User learner = application.getLearner();
-
         return WorkshopApplicationDTO.builder()
                 .id(application.getId())
                 .workshopId(workshop.getId())
@@ -205,6 +96,7 @@ public class WorkshopApplicationService {
                 .teacherEmail(workshop.getTeacher().getEmail())
                 .workshopDateTime(workshop.getDateTime())
                 .location(workshop.getLocation())
+                .meetingUrl(workshop.getMeetingUrl())
                 .learnerId(learner.getId())
                 .learnerName(learner.getName())
                 .learnerEmail(learner.getEmail())
