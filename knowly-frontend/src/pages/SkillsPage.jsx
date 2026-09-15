@@ -354,9 +354,9 @@ export default function SkillsPage() {
             ? '← Back to Skills'
             : '← Back to Home'}
         </button>
+
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
               {viewMode === 'my'
@@ -377,12 +377,10 @@ export default function SkillsPage() {
           >
             + Add Skill
           </button>
-
         </div>
 
         {/* Skills View Switcher */}
         <div className="flex gap-2 mb-6">
-
           <button
             onClick={() => handleViewChange('all')}
             className={`px-5 py-2 rounded-lg text-sm font-medium transition ${viewMode === 'all'
@@ -402,12 +400,10 @@ export default function SkillsPage() {
           >
             My Skills
           </button>
-
         </div>
 
         {/* Search */}
         <div className="flex flex-col sm:flex-row gap-2 mb-6">
-
           <input
             type="text"
             placeholder={
@@ -447,12 +443,10 @@ export default function SkillsPage() {
           >
             Clear
           </button>
-
         </div>
 
         {/* Categories */}
         <div className="flex flex-wrap gap-2 mb-7">
-
           {CATEGORIES.map((category) => (
             <button
               key={category}
@@ -467,7 +461,6 @@ export default function SkillsPage() {
               {category}
             </button>
           ))}
-
         </div>
 
         {/* Error */}
@@ -479,17 +472,13 @@ export default function SkillsPage() {
 
         {/* Content */}
         {loading ? (
-
           <div className="text-center py-20 text-gray-400 text-lg">
             {viewMode === 'my'
               ? 'Loading your skills...'
               : 'Loading skills...'}
           </div>
-
         ) : skills.length === 0 ? (
-
           <div className="bg-white border border-gray-200 rounded-xl text-center py-20 px-6">
-
             <p className="text-gray-400 text-lg">
               {viewMode === 'my'
                 ? "You haven't posted any skills yet."
@@ -504,16 +493,11 @@ export default function SkillsPage() {
                 ? 'Add your first skill'
                 : 'Be the first to add a skill'}
             </button>
-
           </div>
-
         ) : (
-
           /* Skill Cards */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
             {skills.map((skill) => {
-
               const isOwner =
                 isLoggedIn() &&
                 user?.email === skill.ownerEmail;
@@ -526,10 +510,8 @@ export default function SkillsPage() {
                   key={skill.id}
                   className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition p-5 flex flex-col"
                 >
-
                   {/* Category */}
                   <div className="flex justify-between items-start mb-3">
-
                     <span className="text-xs bg-blue-100 text-blue-600 px-2.5 py-1 rounded-full font-medium">
                       {skill.category}
                     </span>
@@ -537,7 +519,6 @@ export default function SkillsPage() {
                     <span className="text-xs text-gray-400">
                       {skill.experienceYears} yrs exp
                     </span>
-
                   </div>
 
                   {/* Title */}
@@ -579,6 +560,18 @@ export default function SkillsPage() {
 
                   {/* Actions */}
                   <div className="flex flex-wrap gap-2 mt-5">
+                    {/* View Profile */}
+                    {skill.ownerId && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          navigate(`/users/${skill.ownerId}`)
+                        }
+                        className="flex-1 min-w-[120px] text-sm bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition"
+                      >
+                        View Profile
+                      </button>
+                    )}
 
                     {/* Interest */}
                     {!isOwner && isLoggedIn() && (
@@ -602,16 +595,6 @@ export default function SkillsPage() {
                       </button>
                     )}
 
-                    {/* View */}
-                    <button
-                      onClick={() =>
-                        navigate(`/skills/${skill.id}`)
-                      }
-                      className="flex-1 min-w-[80px] text-sm bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition"
-                    >
-                      View
-                    </button>
-
                     {/* Owner Actions */}
                     {isOwner && (
                       <>
@@ -634,19 +617,13 @@ export default function SkillsPage() {
                         </button>
                       </>
                     )}
-
                   </div>
-
                 </div>
               );
             })}
-
           </div>
-
         )}
-
       </main>
-
     </div>
   );
 }
