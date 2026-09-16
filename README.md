@@ -1,401 +1,328 @@
-# SkillSwap
+# Knowly
 
-SkillSwap is a full-stack web application that connects learners and teachers, allowing users to share and learn skills through an intuitive platform.
+> A full-stack peer learning platform for discovering skills, connecting learners and instructors, and conducting workshops in public or private learning rooms.
 
-## Tech Stack
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Knowly-000000?style=for-the-badge&logo=vercel)](https://knowly-phi.vercel.app/)
+
+**Live Demo:** https://knowly-phi.vercel.app/
+
+## Overview
+
+Knowly is a full-stack learning and skill-sharing platform built around peer-to-peer knowledge exchange. Users can create profiles, publish skills they can teach, discover instructors, express interest in learning a skill, create and join learning rooms, and organize workshops.
+
+The application separates public learning experiences from room-based collaboration, allowing workshops to be discovered publicly while also supporting private or group-specific learning spaces.
+
+The project is implemented as a React frontend backed by a Spring Boot REST API and a MySQL database, with JWT-based authentication and transactional email support.
+
+## Key Features
+
+### Authentication & Accounts
+
+- User registration and login
+- Email OTP verification during registration
+- OTP resend flow
+- JWT-based authentication
+- Role-aware application behavior
+- Persistent authentication using browser local storage
+
+### Skills & Profiles
+
+- Create and manage skills
+- Edit and remove personal skills
+- Browse skills offered by other users
+- View public instructor profiles
+- Display workshops and reviews associated with instructors
+- Express interest in learning a skill
+- Track personal interests
+
+### Workshops
+
+- Create workshops for skill-based learning
+- Public workshop discovery
+- Dedicated **My Workshops** management
+- Workshop applications and enrollment management
+- Accept or reject learner applications
+- View enrolled learners
+- Upload and manage workshop learning resources
+- Delete workshops with associated application/notification handling
+- Search and browse workshops
+
+### Learning Rooms
+
+- Create learning rooms
+- Join rooms using invitation codes
+- View rooms a user belongs to
+- Manage room-specific workshops
+- Separate room workshops from public workshop discovery
+- Room-owner controls for managing or deleting rooms
+
+### Notifications & Reviews
+
+- In-app notification system
+- Notifications for important workshop and room events
+- Ratings and reviews for learning experiences
+- Featured reviews on public profiles
+
+## Technology Stack
 
 ### Frontend
-- React
-- Vite
-- Tailwind CSS
-- Axios
-- React Router
+
+- **React 19**
+- **Vite 8**
+- **React Router**
+- **Tailwind CSS**
+- **Axios**
+- JavaScript / JSX
 
 ### Backend
-- Java 21
-- Spring Boot
-- Spring Data JPA
-- Spring Security
-- MySQL
-- Swagger (OpenAPI)
-- Maven
 
----
+- **Java 21**
+- **Spring Boot 4**
+- **Spring Web MVC**
+- **Spring Data JPA / Hibernate**
+- **Spring Security**
+- **JWT (JJWT)**
+- **Spring Validation**
+- **Springdoc OpenAPI / Swagger UI**
+- **Lombok**
+- **MySQL Connector/J**
 
-# Features
+### Infrastructure & Services
 
-- User Registration
-- User Login
-- JWT Authentication
-- Create Skills
-- View All Skills
-- Search Skills
-- Filter Skills by Category
-- Update Skills
-- Delete Skills
-- View Personal Skills
-- Swagger API Documentation
+- **Vercel** — frontend deployment
+- **Render** — backend deployment
+- **Aiven MySQL** — managed database
+- **Resend** — transactional email delivery
 
----
+## Architecture
 
-# Project Structure
-
+```text
+                         ┌──────────────────────┐
+                         │      Knowly User     │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────────┐
+                         │   React + Vite UI    │
+                         │      (Vercel)        │
+                         └──────────┬───────────┘
+                                    │ REST / JSON
+                                    ▼
+                         ┌──────────────────────┐
+                         │   Spring Boot API    │
+                         │       (Render)       │
+                         └───────┬───────┬──────┘
+                                 │       │
+                    JPA / JDBC   │       │ Transactional Email
+                                 │       │
+                                 ▼       ▼
+                         ┌────────────┐ ┌────────────┐
+                         │   MySQL    │ │   Resend   │
+                         │  (Aiven)   │ │    API     │
+                         └────────────┘ └────────────┘
 ```
-SkillSwap
+
+## Project Structure
+
+```text
+knowly/
+├── src/
+│   └── main/
+│       ├── java/com/skillswap/knowly_backend/
+│       │   ├── config/
+│       │   ├── controller/
+│       │   ├── dto/
+│       │   ├── entity/
+│       │   ├── exception/
+│       │   ├── repository/
+│       │   └── service/
+│       └── resources/
+│           └── application.properties
 │
-├── skillswap-frontend
-│   ├── src
-│   ├── public
-│   └── package.json
+├── knowly-frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   └── services/
+│   ├── package.json
+│   └── vercel.json
 │
-├── src
-│   ├── main
-│   ├── test
-│   └── resources
-│
+├── Dockerfile
 ├── pom.xml
+├── mvnw
+├── mvnw.cmd
 └── README.md
 ```
 
----
+## Getting Started
 
-# Prerequisites
+### Prerequisites
 
-Before running the project, install:
+Make sure the following are installed:
 
 - Java 21
-- Node.js (18+ recommended)
-- npm
-- MySQL Server
-- Git
+- Maven (or use the included Maven Wrapper)
+- Node.js and npm
+- MySQL 8.x or a compatible MySQL database
 
----
-
-# Clone the Repository
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/nethrashivani/SkillSwap.git
-
-cd SkillSwap
+git clone https://github.com/nethrashivani/knowly.git
+cd knowly
 ```
 
----
+### 2. Configure the backend
 
-# Database Setup
+Create the required environment variables for the Spring Boot application.
 
-Open MySQL Workbench and create the database.
+| Variable | Required | Description |
+|---|---|---|
+| `DB_URL` | Yes | MySQL JDBC connection URL |
+| `DB_USERNAME` | Yes | MySQL username |
+| `DB_PASSWORD` | Yes | MySQL password |
+| `JWT_SECRET` | Yes | Secret used to sign JWTs |
+| `JWT_EXPIRATION` | Optional | JWT expiration configuration |
+| `RESEND_API_KEY` | Optional* | Resend API key for transactional email |
+| `RESEND_FROM_EMAIL` | Optional | Sender address for transactional email |
+| `PORT` | Optional | Server port; defaults to `8080` |
 
-```sql
-CREATE DATABASE skillswap;
+\* Required for email functionality that depends on Resend.
+
+**Never commit real credentials, API keys, JWT secrets, or database passwords to the repository.**
+
+### 3. Run the backend
+
+#### Windows
+
+```powershell
+.\mvnw.cmd spring-boot:run
 ```
 
-Open
-
-```
-src/main/resources/application.properties
-```
-
-Update your database credentials.
-
-Example:
-
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/skillswap
-spring.datasource.username=root
-spring.datasource.password=YOUR_PASSWORD
-```
-
----
-
-# Running the Backend
-
-Open a terminal in the project root.
-
-Run:
+#### macOS / Linux
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-Windows:
+The backend runs on the configured `PORT`, or `8080` by default.
 
-```powershell
-.\mvnw spring-boot:run
-```
-
----
-
-## If Port 8080 is Already in Use
-
-You may encounter:
-
-```
-Web server failed to start.
-Port 8080 was already in use.
-```
-
-### Option 1 (Recommended)
-
-Find the process.
-
-```powershell
-netstat -ano | findstr :8080
-```
-
-Kill it.
-
-```powershell
-taskkill /PID <PID> /F
-```
-
----
-
-### Option 2
-
-Change the backend port.
-
-Open
-
-```
-src/main/resources/application.properties
-```
-
-Add
-
-```properties
-server.port=8081
-```
-
----
-
-# Running the Frontend
-
-Open another terminal.
+### 4. Run the frontend
 
 ```bash
-cd skillswap-frontend
-```
-
-Install dependencies.
-
-```bash
+cd knowly-frontend
 npm install
-```
-
-Run the frontend.
-
-```bash
 npm run dev
 ```
 
-The application will be available at
+Vite will start the frontend development server and provide the local URL in the terminal.
 
+> **Note:** The current frontend service layer points to the deployed Knowly backend API. When developing against a locally running backend, update the frontend API base URLs accordingly.
+
+## API Documentation
+
+The backend includes Springdoc OpenAPI and Swagger UI.
+
+When the backend is running locally, Swagger UI is available at:
+
+```text
+http://localhost:8080/swagger-ui.html
 ```
-http://localhost:5173
+
+The OpenAPI specification is available at:
+
+```text
+http://localhost:8080/v3/api-docs
 ```
+
+## Authentication Flow
+
+Knowly uses JWT-based authentication for protected API operations.
+
+```text
+Register
+   │
+   ▼
+Email OTP verification
+   │
+   ▼
+Authenticated user
+   │
+   ▼
+Login → JWT token
+   │
+   ▼
+Protected API requests
+```
+
+The frontend stores the returned JWT in `localStorage` and uses it for authenticated application flows.
+
+## Deployment
+
+The current deployment architecture is:
+
+| Layer | Platform |
+|---|---|
+| Frontend | Vercel |
+| Backend | Render |
+| Database | Aiven MySQL |
+| Email | Resend |
+
+### Frontend
+
+The production frontend is deployed from the `knowly-frontend` directory using Vercel.
+
+### Backend
+
+The Spring Boot backend is deployed from the repository root. The application reads database and authentication configuration from environment variables rather than hard-coding credentials.
+
+### Database
+
+The application uses MySQL through Spring Data JPA/Hibernate. The production database is hosted on Aiven.
+
+## Design Principles
+
+- **Separation of concerns** — frontend, API, persistence, and external services are separated into clear layers.
+- **Secure authentication** — protected operations use Spring Security and JWT authentication.
+- **Role-aware access** — ownership and participation rules are enforced for skills, workshops, rooms, and applications.
+- **Public vs. private learning spaces** — public workshops and room-specific workshops are treated as separate contexts.
+- **RESTful communication** — the React client communicates with the backend through HTTP APIs.
+- **Environment-based configuration** — deployment secrets and infrastructure configuration are supplied through environment variables.
+
+## Current Scope
+
+Knowly currently focuses on skill discovery and peer learning workflows including:
+
+1. Discovering skills and instructors
+2. Building public profiles
+3. Expressing interest in learning skills
+4. Creating and managing workshops
+5. Applying to workshops
+6. Managing learners and applications
+7. Creating and joining learning rooms
+8. Sharing workshop resources
+9. Receiving in-app notifications
+10. Rating and reviewing learning experiences
+
+## Future Improvements
+
+Potential areas for continued development include:
+
+- Centralized frontend environment configuration for API URLs
+- Expanded automated test coverage
+- Improved real-time notification delivery
+- Richer workshop scheduling and calendar integration
+- Enhanced moderation and reporting workflows
+- Additional accessibility and UI refinements
+
+## Live Demo
+
+**Knowly:** https://knowly-phi.vercel.app/
+
+## License
+
+This project is currently maintained as a personal project. Licensing terms can be added here if the repository is released under a specific open-source license.
 
 ---
 
-# IMPORTANT
-
-If you changed the backend port to **8081**, update every backend API URL in the frontend.
-
-Search for
-
-```
-http://localhost:8080
-```
-
-Replace with
-
-```
-http://localhost:8081
-```
-
-This includes:
-
-- authService.js
-- skillService.js
-- axios.js (if present)
-- any API utility file
-
-Otherwise:
-
-- Registration will fail
-- Login will fail
-- Skills won't load
-
----
-
-# Swagger Documentation
-
-After starting the backend, open
-
-```
-http://localhost:8080/swagger-ui/index.html
-```
-
-or
-
-```
-http://localhost:8081/swagger-ui/index.html
-```
-
-depending on your configured port.
-
----
-
-# Default Flow
-
-1. Start MySQL
-2. Start Backend
-3. Start Frontend
-4. Register a user
-5. Login
-6. Create Skills
-7. Search / Update / Delete Skills
-
----
-
-# Common Issues
-
-## Registration Failed
-
-Possible causes:
-
-- Backend not running
-- Wrong backend URL
-- Database not connected
-
-Check:
-
-```
-application.properties
-```
-
-and
-
-```
-authService.js
-```
-
----
-
-## Skills Not Loading
-
-Possible causes:
-
-- Backend URL still points to port 8080
-- JWT token not sent
-- Backend not running
-
----
-
-## Database Connection Error
-
-Verify:
-
-```properties
-spring.datasource.username
-spring.datasource.password
-spring.datasource.url
-```
-
-Make sure MySQL is running.
-
----
-
-## Maven Command Not Found
-
-Use the Maven Wrapper.
-
-Windows
-
-```powershell
-.\mvnw spring-boot:run
-```
-
-Linux/Mac
-
-```bash
-./mvnw spring-boot:run
-```
-
----
-
-## npm install Fails
-
-Delete
-
-```
-node_modules
-```
-
-and
-
-```
-package-lock.json
-```
-
-Run
-
-```bash
-npm install
-```
-
-again.
-
----
-
-## Swagger Not Opening
-
-Ensure the backend has started successfully.
-
-Look for:
-
-```
-Started SkillswapBackendApplication
-```
-
----
-
-# API Endpoints
-
-### Authentication
-
-```
-POST /api/auth/register
-POST /api/auth/login
-```
-
-### Skills
-
-```
-GET    /api/skills
-GET    /api/skills/{id}
-POST   /api/skills
-PUT    /api/skills/{id}
-DELETE /api/skills/{id}
-GET    /api/skills/search
-GET    /api/skills/category/{category}
-GET    /api/skills/my
-```
-
----
-
-# Future Improvements
-
-- Profile Pictures
-- Skill Ratings
-- Booking Sessions
-- Chat System
-- Notifications
-- Docker Support
-- CI/CD Pipeline
-- Deployment
-
----
-
-# Author
-
-**M. S. Nethrashivani**
+Built with React, Spring Boot, MySQL, and a lot of iteration.
